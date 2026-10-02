@@ -1,0 +1,4045 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#e7ecea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c1210" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Homey Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a wall panel. Clock and house on top, one strip of live readings, then one labelled
+   bay per category holding equal-sized device modules. A lamp fills its own module with
+   lamplight up to the level it is dimmed to. */
+:root {
+  --bg: #e7ecea;
+  --panel: #fbfcfb;
+  --panel-2: #f0f4f2;
+  --sunk: #dfe6e3;
+  --ink: #13201c;
+  --ink-2: #44534d;
+  --ink-3: #5f6d68;
+  --line: #d3dcd8;
+  --line-strong: #b5c2bd;
+  --accent: #0a7565;
+  --accent-ink: #ffffff;
+  --accent-wash: #d3ece6;
+  --glow: #e38b06;
+  --glow-ink: #3b2300;
+  --glow-wash: #fbdfae;
+  --glow-soft: #fdf0d8;
+  --heat: #c45718;
+  --heat-wash: #fbe2d2;
+  --good: #1b7f45;
+  --good-ink: #13643a;
+  --good-wash: #d6eedf;
+  --warn: #b26a00;
+  --warn-ink: #7a4600;
+  --warn-wash: #fbe9c9;
+  --crit: #c4302c;
+  --crit-ink: #9e211e;
+  --crit-wash: #f8dad8;
+  --scrim: rgb(10 18 15 / 0.45);
+  --shadow-1: 0 1px 2px rgb(19 32 28 / 0.06), 0 2px 10px rgb(19 32 28 / 0.04);
+  --shadow-2: 0 18px 50px rgb(19 32 28 / 0.22);
+
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --fs-xs: 0.78rem;
+  --fs-sm: 0.845rem;
+  --fs-md: 0.94rem;
+  --fs-lg: 1.06rem;
+  --fs-xl: 1.4rem;
+  --fs-2xl: 1.8rem;
+  --fs-clock: clamp(2.2rem, 1.6rem + 2.2vw, 3.1rem);
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --gutter: clamp(16px, 2.4vw, 32px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1210;
+    --panel: #141c19;
+    --panel-2: #1a2420;
+    --sunk: #26322e;
+    --ink: #e4ece8;
+    --ink-2: #a6b4ae;
+    --ink-3: #8a9893;
+    --line: #24302c;
+    --line-strong: #3a4944;
+    --accent: #3cbca5;
+    --accent-ink: #04201a;
+    --accent-wash: #143631;
+    --glow: #ffb340;
+    --glow-ink: #2a1800;
+    --glow-wash: #4b3512;
+    --glow-soft: #262014;
+    --heat: #ff8c50;
+    --heat-wash: #3d2314;
+    --good: #4cc483;
+    --good-ink: #8ddcae;
+    --good-wash: #13301f;
+    --warn: #f2a93b;
+    --warn-ink: #f7c674;
+    --warn-wash: #3a2a10;
+    --crit: #ff6a62;
+    --crit-ink: #ffa19b;
+    --crit-wash: #421b19;
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+    --shadow-2: 0 18px 50px rgb(0 0 0 / 0.55);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0c1210;
+  --panel: #141c19;
+  --panel-2: #1a2420;
+  --sunk: #26322e;
+  --ink: #e4ece8;
+  --ink-2: #a6b4ae;
+  --ink-3: #8a9893;
+  --line: #24302c;
+  --line-strong: #3a4944;
+  --accent: #3cbca5;
+  --accent-ink: #04201a;
+  --accent-wash: #143631;
+  --glow: #ffb340;
+  --glow-ink: #2a1800;
+  --glow-wash: #4b3512;
+  --glow-soft: #262014;
+  --heat: #ff8c50;
+  --heat-wash: #3d2314;
+  --good: #4cc483;
+  --good-ink: #8ddcae;
+  --good-wash: #13301f;
+  --warn: #f2a93b;
+  --warn-ink: #f7c674;
+  --warn-wash: #3a2a10;
+  --crit: #ff6a62;
+  --crit-ink: #ffa19b;
+  --crit-wash: #421b19;
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 18px 50px rgb(0 0 0 / 0.55);
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------ base */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select { font: inherit; color: inherit; }
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.i {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.i--fill { fill: currentColor; stroke: none; }
+
+[hidden] { display: none !important; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.sheet-form { display: contents; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.app {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+  padding-block: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ------------------------------------------------------------------ masthead */
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 28px;
+}
+
+.mast-time {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.clock {
+  font-family: var(--font-display);
+  font-size: var(--fs-clock);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-variation-settings: "opsz" 96;
+}
+
+.date {
+  margin-top: 6px;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.mast-home {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  padding-bottom: 2px;
+}
+
+.mast-home h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.mast-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.mast-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink-2);
+  box-shadow: var(--shadow-1);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.icon-btn:hover { color: var(--ink); border-color: var(--line-strong); }
+.icon-btn .i { width: 20px; height: 20px; }
+.icon-btn.is-spinning .i { animation: spin 0.9s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ------------------------------------------------------------------ status pill */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+.status[data-state="live"]::before { background: var(--good); box-shadow: 0 0 0 3px var(--good-wash); }
+.status[data-state="demo"]::before { background: var(--glow); }
+.status[data-state="connecting"]::before { background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+.status[data-state="error"]::before { background: var(--crit); }
+
+@keyframes pulse { 50% { opacity: 0.3; } }
+
+/* ------------------------------------------------------------------ banner */
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 12px 14px 12px 16px;
+  border-radius: var(--radius);
+  background: var(--glow-soft);
+  border: 1px solid var(--glow-wash);
+  color: var(--ink);
+}
+.banner[data-tone="crit"] { background: var(--crit-wash); border-color: var(--crit-wash); }
+.banner .i { color: var(--warn); width: 22px; height: 22px; }
+.banner[data-tone="crit"] .i { color: var(--crit); }
+.banner p { margin: 0; flex: 1 1 320px; min-width: 0; font-size: var(--fs-sm); }
+.banner strong { font-weight: 600; }
+
+/* ------------------------------------------------------------------ overview */
+
+.overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 14px 18px 14px;
+  border-left: 1px solid var(--line);
+  margin-left: -1px;
+  border-top: 1px solid var(--line);
+  margin-top: -1px;
+}
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.stat-label .i { width: 16px; height: 16px; color: var(--ink-3); }
+.stat-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.stat-value small { font-size: var(--fs-lg); font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
+.stat-sub { color: var(--ink-2); font-size: var(--fs-xs); min-height: 1.2em; }
+.stat[data-tone="warn"] .stat-value { color: var(--warn-ink); }
+.stat[data-tone="crit"] .stat-value { color: var(--crit-ink); }
+.stat[data-tone="good"] .stat-value { color: var(--good-ink); }
+.stat .spark { display: block; width: 100%; height: 34px; margin-top: 4px; }
+.spark-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.spark-area { fill: var(--accent); opacity: 0.1; stroke: none; }
+.spark-dot { fill: var(--accent); stroke: var(--panel); stroke-width: 2; }
+.spark-base { stroke: var(--line); stroke-width: 1; }
+
+/* ------------------------------------------------------------------ attention + moods */
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.strip-label {
+  margin-right: 4px;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  line-height: 1.2;
+  text-align: left;
+}
+.chip:hover { border-color: var(--line-strong); }
+.chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); flex: none; }
+.chip[data-sev="crit"] { background: var(--crit-wash); border-color: var(--crit-wash); }
+.chip[data-sev="crit"] .dot { background: var(--crit); }
+.chip[data-sev="warn"] .dot { background: var(--warn); }
+.chip[data-sev="info"] .dot { background: var(--accent); }
+.chip b { font-weight: 600; }
+.chip .i { width: 16px; height: 16px; color: var(--ink-3); }
+.chip.is-busy { opacity: 0.6; }
+
+/* ------------------------------------------------------------------ toolbar */
+
+.toolbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin-inline: calc(var(--gutter) * -1);
+  padding: 10px var(--gutter);
+  background: var(--bg);
+  border-bottom: 1px solid transparent;
+}
+.toolbar.is-stuck { border-bottom-color: var(--line); }
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex: 1 1 420px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 2px;
+  margin: -2px;
+}
+.filters::-webkit-scrollbar { display: none; }
+.filters.has-more-end { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent); }
+.filters.has-more-start { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent); }
+.filters.has-more-start.has-more-end { -webkit-mask-image: linear-gradient(to right, transparent, #000 48px, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(to right, transparent, #000 48px, #000 calc(100% - 48px), transparent); }
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+  height: 38px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.filter .i { width: 17px; height: 17px; }
+.filter .count {
+  min-width: 1.6em;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.filter:hover { color: var(--ink); border-color: var(--line-strong); }
+.filter[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.filter[aria-pressed="true"] .count { background: color-mix(in srgb, var(--bg) 18%, transparent); color: var(--bg); }
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 1 260px;
+  min-width: 180px;
+}
+.search .i { position: absolute; left: 12px; width: 17px; height: 17px; color: var(--ink-3); pointer-events: none; }
+.search input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  font-size: var(--fs-sm);
+}
+.search input::placeholder { color: var(--ink-3); }
+
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  flex: none;
+}
+.seg button {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+/* ------------------------------------------------------------------ bays */
+
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.bay-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.bay-head .i { width: 22px; height: 22px; color: var(--ink-2); }
+.bay-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-wrap: balance;
+  font-variation-settings: "opsz" 40;
+}
+.bay-meta {
+  margin-left: auto;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  text-align: right;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 188px), 1fr));
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------------ tile */
+
+.tile {
+  --lvl: 0;
+  --fill: var(--accent);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 164px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+  transition: background 0.35s ease, border-color 0.2s;
+}
+
+.tile-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+}
+.tile-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--ink-2);
+  transition: background 0.3s, color 0.3s;
+}
+.tile-icon .i { width: 19px; height: 19px; }
+.tile-more {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-3);
+}
+.tile-more:hover { background: var(--panel-2); color: var(--ink); }
+.tile-more .i { width: 18px; height: 18px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  background: var(--panel-2);
+  color: var(--ink-2);
+}
+.badge[data-sev="crit"] { background: var(--crit); color: #fff; }
+.badge[data-sev="warn"] { background: var(--warn-wash); color: var(--warn-ink); }
+.badge[data-sev="muted"] { background: var(--sunk); color: var(--ink-2); }
+
+.tile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  margin: 6px -4px 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+}
+.tile-main[data-action="toggle"]:active { transform: scale(0.985); }
+.tile-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.tile-zone { color: var(--ink-3); font-size: var(--fs-xs); }
+.tile-state {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.tile-state .val {
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.tile-state .val--text { font-size: 1.12rem; letter-spacing: 0; }
+.tile-state .unit { color: var(--ink-2); font-size: var(--fs-md); font-weight: 500; }
+.tile-sub {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.tile-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  min-height: 36px;
+}
+.tile-controls .range { flex: 1; min-width: 0; }
+.tile--media .tile-controls .ctl ~ .range { flex-basis: 100%; }
+.tile-controls .range-val {
+  min-width: 3.2ch;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* states */
+.tile--light { --fill: var(--ink-3); }
+.tile.tone-lit {
+  --fill: var(--glow);
+  border-color: var(--glow-wash);
+  background:
+    linear-gradient(to top, var(--glow-wash) 0%, var(--glow-soft) calc(var(--lvl) * 100%), var(--panel) calc(var(--lvl) * 100% + 0.5px)),
+    var(--panel);
+}
+.tile.tone-lit .tile-icon { background: var(--glow); color: var(--glow-ink); box-shadow: 0 0 0 4px var(--glow-soft), 0 0 18px var(--glow); }
+.tile.tone-lit .tile-state .unit,
+.tile.tone-lit .tile-sub { color: var(--ink); }
+.tile.tone-active .tile-icon { background: var(--accent-wash); color: var(--accent); }
+.tile.tone-open .tile-icon { background: var(--accent-wash); color: var(--accent); }
+.tile.tone-heat .tile-icon { background: var(--heat-wash); color: var(--heat); }
+.tile.tone-heat { --fill: var(--heat); }
+.tile.tone-secure .tile-icon { background: var(--good-wash); color: var(--good); }
+.tile.tone-warn { border-color: var(--warn); }
+.tile.tone-warn .tile-icon { background: var(--warn-wash); color: var(--warn); }
+.tile.tone-crit { border-color: var(--crit); background: var(--crit-wash); }
+.tile.tone-crit .tile-icon { background: var(--crit); color: #fff; }
+.tile.tone-off .tile-state .val { color: var(--ink-2); }
+.tile.is-offline { border-style: dashed; border-color: var(--line-strong); background: transparent; box-shadow: none; }
+.tile.is-offline .tile-main { opacity: 0.7; }
+.tile.is-offline .tile-icon { background: var(--sunk); color: var(--ink-3); }
+.tile.is-busy .tile-icon { animation: pulse 1s ease-in-out infinite; }
+
+.tile-cover-level {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc((1 - var(--lvl)) * 100%);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: repeating-linear-gradient(to bottom, var(--panel-2) 0 7px, var(--sunk) 7px 8px);
+  opacity: 0.75;
+  pointer-events: none;
+  transition: height 0.5s ease;
+}
+.tile--cover > :not(.tile-cover-level) { position: relative; }
+
+/* ------------------------------------------------------------------ controls */
+
+.ctl {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 36px;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--ink);
+}
+.ctl:hover { border-color: var(--line-strong); }
+.ctl .i { width: 18px; height: 18px; }
+.ctl[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.ctl.ctl--wide { width: auto; padding: 0 12px; font-size: var(--fs-sm); font-weight: 600; gap: 6px; display: inline-flex; }
+.ctl.ctl--confirm { background: var(--warn-wash); border-color: var(--warn); color: var(--warn-ink); }
+.ctl:disabled { opacity: 0.45; }
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.stepper-val {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stepper-val small { display: block; color: var(--ink-3); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+
+.segmented {
+  display: flex;
+  width: 100%;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel-2);
+}
+.segmented button {
+  flex: 1;
+  height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.segmented button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow-1), inset 0 0 0 1px var(--line-strong); }
+
+.range {
+  --pct: 50%;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 30px;
+  margin: 0;
+  background: transparent;
+  touch-action: pan-y;
+}
+.range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 99px;
+  background: linear-gradient(to right, var(--fill) var(--pct), var(--sunk) var(--pct));
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
+  border: 2px solid var(--fill);
+  border-radius: 50%;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+}
+.range::-moz-range-track { height: 8px; border-radius: 99px; background: var(--sunk); }
+.range::-moz-range-progress { height: 8px; border-radius: 99px; background: var(--fill); }
+.range::-moz-range-thumb { width: 18px; height: 18px; border: 2px solid var(--fill); border-radius: 50%; background: var(--panel); }
+
+.switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: var(--sunk);
+  transition: background 0.2s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--panel);
+  box-shadow: var(--shadow-1);
+  transition: transform 0.2s;
+}
+.switch[aria-checked="true"] { background: var(--accent); }
+.switch[aria-checked="true"]::after { transform: translateX(20px); }
+
+/* ------------------------------------------------------------------ empty + skeleton */
+
+.empty {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  padding: 48px 16px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--ink-2);
+  text-align: center;
+}
+.empty strong { color: var(--ink); font-size: var(--fs-lg); }
+
+.tile.skeleton { background: var(--panel); }
+.tile.skeleton .bar { height: 12px; border-radius: 6px; background: var(--sunk); }
+.tile.skeleton .bar + .bar { margin-top: 8px; }
+.tile.skeleton .tile-icon { background: var(--sunk); }
+.skeleton-lines { margin-top: auto; }
+.tile.skeleton .bar--long { width: 70%; }
+.tile.skeleton .bar--short { width: 40%; }
+
+/* ------------------------------------------------------------------ footer */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+/* ------------------------------------------------------------------ dialogs */
+
+dialog.sheet {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(88vh, 860px);
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+dialog.sheet[open] { display: flex; flex-direction: column; }
+dialog.sheet::backdrop { background: var(--scrim); }
+
+.sheet-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 18px 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.sheet-head .tile-icon { width: 44px; height: 44px; }
+.sheet-head .tile-icon .i { width: 22px; height: 22px; }
+.sheet-title { flex: 1; min-width: 0; }
+.sheet-title h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.sheet-title p { margin: 4px 0 0; color: var(--ink-2); font-size: var(--fs-sm); }
+.sheet-body { overflow-y: auto; padding: 8px 20px 18px; }
+.sheet-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.sheet-foot code { font-family: var(--font-mono); font-size: 0.72rem; overflow-wrap: anywhere; color: var(--ink-2); }
+.sheet-foot .spacer { flex: 1; }
+
+.cap-list { display: flex; flex-direction: column; }
+.cap-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.cap-row:last-child { border-bottom: 0; }
+.cap-label { min-width: 0; font-weight: 500; }
+.cap-label .cap-id { display: block; color: var(--ink-3); font-family: var(--font-mono); font-size: 0.7rem; font-weight: 400; overflow-wrap: anywhere; }
+.cap-value { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.cap-value[data-sev="crit"] { color: var(--crit-ink); }
+.cap-value[data-sev="warn"] { color: var(--warn-ink); }
+.cap-control { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; }
+.cap-control .range { flex: 1; }
+.cap-control select,
+.field input,
+.field select {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  font-size: var(--fs-md);
+}
+.cap-control select { flex: 1; }
+.cap-time { color: var(--ink-3); font-size: var(--fs-xs); grid-column: 1 / -1; margin-top: -2px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--panel-2); }
+.btn--primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn--primary:hover { background: var(--accent); filter: brightness(1.06); }
+.btn--ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
+.btn .i { width: 17px; height: 17px; }
+
+.form { display: flex; flex-direction: column; gap: 16px; padding-block: 8px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 600; font-size: var(--fs-sm); }
+.field .hint { color: var(--ink-2); font-size: var(--fs-xs); }
+.field input,
+.field select { width: 100%; }
+.check { display: flex; align-items: flex-start; gap: 10px; font-size: var(--fs-sm); }
+.check input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--accent); }
+.test-result {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.test-result[data-tone="good"] { background: var(--good-wash); color: var(--good-ink); }
+.test-result[data-tone="crit"] { background: var(--crit-wash); color: var(--crit-ink); }
+
+/* ------------------------------------------------------------------ toast */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 11px 16px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--bg);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-sm);
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+.toast .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex: none; }
+.toast[data-tone="crit"] .dot { background: var(--crit); }
+
+/* ------------------------------------------------------------------ responsive */
+
+@media (max-width: 720px) {
+  .app { padding-block: 14px 32px; gap: 14px; }
+  .masthead { align-items: flex-start; }
+  .mast-home { order: 3; flex-basis: 100%; }
+  .mast-actions { gap: 4px; }
+  .icon-btn { width: 38px; height: 38px; border-radius: 10px; }
+  .search { flex: 1 1 100%; min-width: 0; }
+  .filters { flex-basis: 100%; }
+  .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat { padding: 12px 14px; }
+  .stat-value { font-size: var(--fs-xl); }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 8px; }
+  .tile { min-height: 150px; padding: 10px; }
+  .tile-state .val { font-size: 1.35rem; }
+  .bay-head { flex-wrap: wrap; }
+  .bay-meta { margin-left: 0; flex-basis: 100%; text-align: left; }
+}
+
+@media (max-width: 560px) {
+  dialog.sheet {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    margin: auto 0 0;
+    border-radius: 22px 22px 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .tile.tone-lit { border: 2px solid CanvasText; }
+  .status::before,
+  .chip .dot { forced-color-adjust: none; }
+}
+</style>
+</head>
+<body>
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v7"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5"/><path d="M6 8h12v3a6 6 0 0 1-12 0z"/><path d="M12 17v4"/></symbol>
+  <symbol id="i-blinds" viewBox="0 0 24 24"><path d="M3 4h18"/><path d="M5 4v10h14V4"/><path d="M5 7.5h14M5 11h14"/><path d="M12 14v4"/><circle cx="12" cy="19.5" r="1.5"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><circle cx="12" cy="14" r="3"/><circle cx="12" cy="7.5" r="1"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-sensor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="i-appliance" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6.5h.01M11 6.5h.01"/></symbol>
+  <symbol id="i-washer" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6.5h.01M11 6.5h.01"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21c-3.3 0-6-2.5-6-6 0-4 3.5-6 4-10 2 1.5 3.5 4 3.5 6 1-1 1.5-2 1.5-3 2 1.8 3 4.3 3 7 0 3.5-2.7 6-6 6z"/></symbol>
+  <symbol id="i-fan" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><path d="M12 10.5C12 7 13 4 15.5 4S18 7.5 12 10.5zM13.3 12.8c3 1.7 5 4.2 3.8 6.3s-4.4.2-3.8-6.3zM10.7 12.8c-3 1.7-6 2.2-7.2.1s1.4-4.1 7.2-.1z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol>
+  <symbol id="i-smoke" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.5M12 18v2.5"/></symbol>
+  <symbol id="i-garage" viewBox="0 0 24 24"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8M7 16h10M7 18.5h10"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/><path d="M6.5 10v4M9.5 10v4M12.5 10v4"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><path d="M3 15.5V13l2.2-5h13.6L21 13v2.5"/><path d="M3 13h18"/><path d="M3 15.5h18v2.5h-2M5 18H3v-2.5"/><circle cx="7.5" cy="18" r="1.8"/><circle cx="16.5" cy="18" r="1.8"/></symbol>
+  <symbol id="i-vacuum" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="9" r="2"/><path d="M7 15h10"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M4 21h16"/><path d="M14.5 12h.01"/></symbol>
+  <symbol id="i-motion" viewBox="0 0 24 24"><circle cx="13.5" cy="4.5" r="1.5"/><path d="M9 21l2.5-6 3 3v3M7 11.5l3-3.5h4l2 3 3 1M11.5 15l1.5-7"/></symbol>
+  <symbol id="i-button" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.4" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 1 1-2.6-6.4"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5.5v13M15.5 5.5v13" stroke-width="3"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M6 6v12l8.5-6z" fill="currentColor"/><path d="M18 6v12"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M18 6v12l-8.5-6z" fill="currentColor"/><path d="M6 6v12"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-plug-off" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M9 3v4M15 3v5M18 8v3a6 6 0 0 1-1.2 3.6M14.7 16.4A6 6 0 0 1 6 11V8h2"/><path d="M12 17v4"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <header class="masthead">
+    <div class="mast-time">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date">&nbsp;</div>
+    </div>
+    <div class="mast-home">
+      <h1 id="home-name">Thuis</h1>
+      <div class="mast-meta">
+        <span class="status" id="status" data-state="connecting">Verbinden</span>
+        <span id="outdoor"></span>
+      </div>
+    </div>
+    <div class="mast-actions">
+      <button type="button" class="icon-btn" id="btn-refresh" data-action="refresh" aria-label="Nu verversen" title="Nu verversen"><svg class="i"><use href="#i-refresh"/></svg></button>
+      <button type="button" class="icon-btn" id="btn-theme" data-action="theme" aria-label="Thema wisselen" title="Thema"><svg class="i"><use href="#i-contrast"/></svg></button>
+      <button type="button" class="icon-btn" id="btn-fullscreen" data-action="fullscreen" aria-label="Schermvullend" title="Schermvullend"><svg class="i"><use href="#i-expand"/></svg></button>
+      <button type="button" class="icon-btn" id="btn-settings" data-action="settings" aria-label="Instellingen" title="Instellingen"><svg class="i"><use href="#i-settings"/></svg></button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="overview" id="overview" aria-label="Overzicht"></section>
+  <div class="strip" id="attention" hidden></div>
+  <div class="strip" id="moods" hidden></div>
+
+  <div class="toolbar" id="toolbar">
+    <nav class="filters" id="filters" aria-label="Filter"></nav>
+    <label class="search">
+      <span class="visually-hidden">Zoeken</span>
+      <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <input type="search" id="search" placeholder="Zoek apparaat of ruimte" autocomplete="off" spellcheck="false">
+    </label>
+    <div class="seg" role="group" aria-label="Indeling">
+      <button type="button" id="view-category" data-action="view" data-value="category" aria-pressed="true">Categorie</button>
+      <button type="button" id="view-zone" data-action="view" data-value="zone" aria-pressed="false">Ruimte</button>
+    </div>
+  </div>
+
+  <main class="sections" id="sections" aria-live="off"></main>
+
+  <footer class="footer" id="footer"></footer>
+</div>
+
+<dialog class="sheet" id="details" aria-labelledby="details-title"></dialog>
+
+<dialog class="sheet" id="settings" aria-labelledby="settings-title">
+  <form method="dialog" id="settings-form" class="sheet-form">
+    <div class="sheet-head">
+      <span class="tile-icon" aria-hidden="true"><svg class="i"><use href="#i-settings"/></svg></span>
+      <div class="sheet-title">
+        <h2 id="settings-title">Instellingen</h2>
+        <p>Verbinding met MCP AI Bridge op je Homey Pro.</p>
+      </div>
+      <button type="button" class="tile-more" data-action="close-dialog" aria-label="Sluiten"><svg class="i"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <div class="form">
+        <div class="field">
+          <label for="set-home">Naam van je huis</label>
+          <input id="set-home" type="text" maxlength="40" placeholder="Thuis">
+        </div>
+        <div class="field">
+          <label for="set-endpoint">Adres van de bridge</label>
+          <input id="set-endpoint" type="url" inputmode="url" placeholder="http://192.168.1.50:52199/mcp" autocomplete="off" spellcheck="false">
+          <span class="hint" id="set-endpoint-hint">Het MCP-adres uit de app-instellingen van MCP AI Bridge, tab Status. Leeg laten als dit dashboard door de bridge zelf wordt geserveerd.</span>
+        </div>
+        <div class="field">
+          <label for="set-key">API-sleutel</label>
+          <input id="set-key" type="password" autocomplete="off" spellcheck="false" placeholder="Plak hier de sleutel">
+          <span class="hint">Maak op de Security-tab een aparte sleutel met permissie <b>Control only</b>. De sleutel blijft alleen in deze browser.</span>
+        </div>
+        <div class="field">
+          <label for="set-interval">Verversen</label>
+          <select id="set-interval">
+            <option value="5">Elke 5 seconden</option>
+            <option value="10">Elke 10 seconden</option>
+            <option value="30">Elke 30 seconden</option>
+            <option value="60">Elke minuut</option>
+          </select>
+        </div>
+        <label class="check" for="set-demo">
+          <input id="set-demo" type="checkbox">
+          <span>Voorbeeldgegevens tonen in plaats van mijn eigen Homey</span>
+        </label>
+        <pre class="test-result" id="test-result" hidden></pre>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button type="button" class="btn btn--ghost" data-action="test-connection">Verbinding testen</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" data-action="close-dialog">Annuleren</button>
+      <button type="submit" class="btn btn--primary" id="settings-save">Opslaan</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="dot"></span><span id="toast-text"></span></div>
+
+<script type="application/json" id="hd-config">{}</script>
+<script>
+/*
+ * Homey Dashboard: kernlogica.
+ * Geen DOM, geen netwerk: normaliseren van wat MCP AI Bridge teruggeeft, indelen
+ * in categorieën, samenvattingen per apparaat en het herkennen van de juiste tools.
+ * Draait als klassiek script in de browser en als module in Node (tests, scripts).
+ */
+(function (root) {
+  'use strict';
+
+  // ---------------------------------------------------------------- categorieën
+
+  const CATEGORIES = [
+    { id: 'verlichting', label: 'Verlichting', icon: 'bulb' },
+    { id: 'klimaat', label: 'Klimaat', icon: 'thermo' },
+    { id: 'schakelaars', label: 'Stekkers & schakelaars', icon: 'plug' },
+    { id: 'zonwering', label: 'Zonwering & gordijnen', icon: 'blinds' },
+    { id: 'media', label: 'Media', icon: 'speaker' },
+    { id: 'beveiliging', label: 'Beveiliging', icon: 'shield' },
+    { id: 'sensoren', label: 'Sensoren', icon: 'sensor' },
+    { id: 'energie', label: 'Energie', icon: 'bolt' },
+    { id: 'huishouden', label: 'Huishouden', icon: 'appliance' },
+    { id: 'overig', label: 'Overig', icon: 'cube' },
+  ];
+  const CATEGORY_BY_ID = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));
+
+  // Homey device classes, zoals de Homey Web API ze teruggeeft.
+  const CLASS_TO_CATEGORY = {
+    light: 'verlichting',
+
+    socket: 'schakelaars', button: 'schakelaars', remote: 'schakelaars',
+
+    thermostat: 'klimaat', heater: 'klimaat', radiator: 'klimaat', airconditioning: 'klimaat',
+    fan: 'klimaat', airpurifier: 'klimaat', airtreatment: 'klimaat', dehumidifier: 'klimaat',
+    humidifier: 'klimaat', boiler: 'klimaat', heatpump: 'klimaat', fireplace: 'klimaat',
+    waterheater: 'klimaat',
+
+    windowcoverings: 'zonwering', blinds: 'zonwering', curtain: 'zonwering', sunshade: 'zonwering',
+    shutterblinds: 'zonwering', awning: 'zonwering',
+
+    speaker: 'media', tv: 'media', amplifier: 'media', mediaplayer: 'media', settopbox: 'media',
+    gameconsole: 'media', soundbar: 'media', projector: 'media',
+
+    lock: 'beveiliging', homealarm: 'beveiliging', camera: 'beveiliging', doorbell: 'beveiliging',
+    smokealarm: 'beveiliging', smokedetector: 'beveiliging', siren: 'beveiliging', garagedoor: 'beveiliging',
+
+    solarpanel: 'energie', battery: 'energie', evcharger: 'energie', car: 'energie', energy: 'energie',
+    meter: 'energie', inverter: 'energie',
+
+    vacuumcleaner: 'huishouden', mop: 'huishouden', washer: 'huishouden', dryer: 'huishouden',
+    washer_and_dryer: 'huishouden', dishwasher: 'huishouden', oven: 'huishouden', microwave: 'huishouden',
+    coffeemachine: 'huishouden', kettle: 'huishouden', fridge: 'huishouden', freezer: 'huishouden',
+    fridge_and_freezer: 'huishouden', cooktop: 'huishouden', hood: 'huishouden', airfryer: 'huishouden',
+    fryer: 'huishouden', grill: 'huishouden', multicooker: 'huishouden', lawnmower: 'huishouden',
+    petfeeder: 'huishouden', sprinkler: 'huishouden', faucet: 'huishouden', waterpurifier: 'huishouden',
+    scale: 'huishouden',
+  };
+
+  const CLASS_ICON = {
+    light: 'bulb', socket: 'plug', button: 'button', remote: 'button',
+    thermostat: 'thermo', heater: 'flame', radiator: 'flame', boiler: 'flame', waterheater: 'flame',
+    fireplace: 'flame', heatpump: 'thermo', airconditioning: 'fan', fan: 'fan', airpurifier: 'fan',
+    airtreatment: 'fan', dehumidifier: 'drop', humidifier: 'drop',
+    windowcoverings: 'blinds', blinds: 'blinds', curtain: 'blinds', sunshade: 'blinds',
+    shutterblinds: 'blinds', awning: 'blinds',
+    speaker: 'speaker', amplifier: 'speaker', soundbar: 'speaker', tv: 'tv', mediaplayer: 'tv',
+    settopbox: 'tv', gameconsole: 'tv', projector: 'tv',
+    lock: 'lock', homealarm: 'shield', camera: 'camera', doorbell: 'bell', smokealarm: 'smoke',
+    smokedetector: 'smoke', siren: 'bell', garagedoor: 'garage',
+    solarpanel: 'sun', battery: 'battery', evcharger: 'car', car: 'car', energy: 'bolt', meter: 'bolt',
+    inverter: 'bolt',
+    vacuumcleaner: 'vacuum', mop: 'vacuum', washer: 'washer', dryer: 'washer', washer_and_dryer: 'washer',
+    dishwasher: 'washer', lawnmower: 'leaf', sprinkler: 'drop', faucet: 'drop',
+  };
+
+  // ---------------------------------------------------------------- capabilities
+
+  const BOOL = 'bool';
+  const NUM = 'number';
+  const ENUM = 'enum';
+  const STR = 'string';
+  const BTN = 'button';
+
+  const CAPS = {
+    onoff: { label: 'Aan/uit', kind: BOOL, on: 'Aan', off: 'Uit', setable: true },
+    dim: { label: 'Helderheid', kind: NUM, fraction: true, setable: true },
+    light_temperature: { label: 'Kleurtemperatuur', kind: NUM, fraction: true, setable: true },
+    light_hue: { label: 'Kleurtoon', kind: NUM, fraction: true, setable: true },
+    light_saturation: { label: 'Verzadiging', kind: NUM, fraction: true, setable: true },
+    light_mode: { label: 'Lichtmodus', kind: ENUM, values: { color: 'Kleur', temperature: 'Wit' }, setable: true },
+
+    target_temperature: { label: 'Doeltemperatuur', kind: NUM, unit: '°C', decimals: 1, min: 5, max: 35, step: 0.5, setable: true },
+    thermostat_mode: { label: 'Modus', kind: ENUM, values: { auto: 'Automatisch', heat: 'Verwarmen', cool: 'Koelen', off: 'Uit' }, setable: true },
+    measure_temperature: { label: 'Temperatuur', kind: NUM, unit: '°C', decimals: 1 },
+    measure_humidity: { label: 'Luchtvochtigheid', kind: NUM, unit: '%', decimals: 0 },
+    measure_co2: { label: 'CO₂', kind: NUM, unit: 'ppm', decimals: 0 },
+    measure_co: { label: 'CO', kind: NUM, unit: 'ppm', decimals: 0 },
+    measure_pm25: { label: 'Fijnstof PM2,5', kind: NUM, unit: 'µg/m³', decimals: 0 },
+    measure_pm10: { label: 'Fijnstof PM10', kind: NUM, unit: 'µg/m³', decimals: 0 },
+    measure_tvoc: { label: 'VOC', kind: NUM, unit: 'ppb', decimals: 0 },
+    measure_voc: { label: 'VOC', kind: NUM, unit: 'ppb', decimals: 0 },
+    measure_luminance: { label: 'Lichtsterkte', kind: NUM, unit: 'lx', decimals: 0 },
+    measure_noise: { label: 'Geluid', kind: NUM, unit: 'dB', decimals: 0 },
+    measure_pressure: { label: 'Luchtdruk', kind: NUM, unit: 'mbar', decimals: 0 },
+    measure_rain: { label: 'Neerslag', kind: NUM, unit: 'mm/u', decimals: 1 },
+    measure_wind_strength: { label: 'Windsnelheid', kind: NUM, unit: 'km/u', decimals: 0 },
+    measure_gust_strength: { label: 'Windstoten', kind: NUM, unit: 'km/u', decimals: 0 },
+    measure_wind_angle: { label: 'Windrichting', kind: NUM, unit: '°', decimals: 0 },
+    measure_ultraviolet: { label: 'UV-index', kind: NUM, decimals: 0 },
+    measure_power: { label: 'Vermogen', kind: NUM, unit: 'W', decimals: 0, power: true },
+    measure_voltage: { label: 'Spanning', kind: NUM, unit: 'V', decimals: 0 },
+    measure_current: { label: 'Stroom', kind: NUM, unit: 'A', decimals: 2 },
+    measure_water: { label: 'Waterdoorstroming', kind: NUM, unit: 'L/min', decimals: 1 },
+    measure_gas: { label: 'Gasverbruik', kind: NUM, unit: 'm³/u', decimals: 2 },
+    measure_battery: { label: 'Batterij', kind: NUM, unit: '%', decimals: 0 },
+    meter_power: { label: 'Energie totaal', kind: NUM, unit: 'kWh', decimals: 1 },
+    meter_gas: { label: 'Gas totaal', kind: NUM, unit: 'm³', decimals: 1 },
+    meter_water: { label: 'Water totaal', kind: NUM, unit: 'm³', decimals: 1 },
+
+    alarm_motion: { label: 'Beweging', kind: BOOL, on: 'Beweging', off: 'Rustig' },
+    alarm_presence: { label: 'Aanwezigheid', kind: BOOL, on: 'Aanwezig', off: 'Niemand' },
+    alarm_occupancy: { label: 'Bezetting', kind: BOOL, on: 'Bezet', off: 'Vrij' },
+    alarm_vibration: { label: 'Trilling', kind: BOOL, on: 'Trilling', off: 'Rustig' },
+    alarm_contact: { label: 'Contact', kind: BOOL, on: 'Open', off: 'Dicht', alarm: 'warn' },
+    alarm_water: { label: 'Waterlek', kind: BOOL, on: 'Lekkage', off: 'Droog', alarm: 'crit' },
+    alarm_smoke: { label: 'Rook', kind: BOOL, on: 'Rook gedetecteerd', off: 'Geen rook', alarm: 'crit' },
+    alarm_fire: { label: 'Brand', kind: BOOL, on: 'Brand', off: 'Geen brand', alarm: 'crit' },
+    alarm_heat: { label: 'Hitte', kind: BOOL, on: 'Te heet', off: 'Normaal', alarm: 'crit' },
+    alarm_co: { label: 'Koolmonoxide', kind: BOOL, on: 'CO gedetecteerd', off: 'Geen CO', alarm: 'crit' },
+    alarm_co2: { label: 'CO₂-alarm', kind: BOOL, on: 'CO₂ te hoog', off: 'Normaal', alarm: 'warn' },
+    alarm_pm25: { label: 'Fijnstofalarm', kind: BOOL, on: 'Fijnstof te hoog', off: 'Normaal', alarm: 'warn' },
+    alarm_tamper: { label: 'Sabotage', kind: BOOL, on: 'Gesaboteerd', off: 'In orde', alarm: 'warn' },
+    alarm_battery: { label: 'Batterijalarm', kind: BOOL, on: 'Batterij bijna leeg', off: 'In orde', alarm: 'warn' },
+    alarm_generic: { label: 'Alarm', kind: BOOL, on: 'Alarm', off: 'Rustig', alarm: 'warn' },
+    alarm_night: { label: 'Nacht', kind: BOOL, on: 'Nacht', off: 'Dag' },
+
+    locked: { label: 'Slot', kind: BOOL, on: 'Vergrendeld', off: 'Ontgrendeld', setable: true },
+    garagedoor_closed: { label: 'Garagedeur', kind: BOOL, on: 'Dicht', off: 'Open', setable: true },
+    homealarm_state: { label: 'Alarmsysteem', kind: ENUM, values: { armed: 'Ingeschakeld', partially_armed: 'Deels ingeschakeld', disarmed: 'Uitgeschakeld' }, setable: true },
+
+    windowcoverings_set: { label: 'Positie', kind: NUM, fraction: true, setable: true },
+    windowcoverings_tilt_set: { label: 'Kanteling', kind: NUM, fraction: true, setable: true },
+    windowcoverings_state: { label: 'Beweging', kind: ENUM, values: { up: 'Omhoog', idle: 'Stil', down: 'Omlaag' }, setable: true },
+    windowcoverings_closed: { label: 'Gesloten', kind: BOOL, on: 'Dicht', off: 'Open', setable: true },
+
+    volume_set: { label: 'Volume', kind: NUM, fraction: true, setable: true },
+    volume_mute: { label: 'Geluid', kind: BOOL, on: 'Gedempt', off: 'Aan', setable: true },
+    volume_up: { label: 'Volume hoger', kind: BTN, setable: true },
+    volume_down: { label: 'Volume lager', kind: BTN, setable: true },
+    channel_up: { label: 'Zender hoger', kind: BTN, setable: true },
+    channel_down: { label: 'Zender lager', kind: BTN, setable: true },
+    speaker_playing: { label: 'Afspelen', kind: BOOL, on: 'Speelt', off: 'Gepauzeerd', setable: true },
+    speaker_next: { label: 'Volgende', kind: BTN, setable: true },
+    speaker_prev: { label: 'Vorige', kind: BTN, setable: true },
+    speaker_shuffle: { label: 'Shuffle', kind: BOOL, on: 'Aan', off: 'Uit', setable: true },
+    speaker_repeat: { label: 'Herhalen', kind: ENUM, values: { none: 'Uit', track: 'Nummer', playlist: 'Afspeellijst' }, setable: true },
+    speaker_track: { label: 'Nummer', kind: STR },
+    speaker_artist: { label: 'Artiest', kind: STR },
+    speaker_album: { label: 'Album', kind: STR },
+    speaker_duration: { label: 'Duur', kind: NUM, unit: 's', decimals: 0 },
+    speaker_position: { label: 'Positie', kind: NUM, unit: 's', decimals: 0 },
+
+    vacuumcleaner_state: { label: 'Status', kind: ENUM, values: { cleaning: 'Aan het zuigen', spot_cleaning: 'Plek zuigen', docked: 'In basisstation', charging: 'Laden', stopped: 'Gestopt' }, setable: true },
+    evcharger_charging: { label: 'Laden', kind: BOOL, on: 'Laadt', off: 'Laadt niet', setable: true },
+    evcharger_charging_state: { label: 'Laadstatus', kind: ENUM, values: { plugged_in_charging: 'Laden', plugged_in: 'Aangesloten', plugged_out: 'Niet aangesloten', plugged_in_paused: 'Gepauzeerd', plugged_in_discharging: 'Ontladen' } },
+    button: { label: 'Knop', kind: BTN, setable: true },
+  };
+
+  const SUFFIX_LABEL = {
+    imported: 'afname', exported: 'teruglevering', delivered: 'teruglevering', consumed: 'afname',
+    produced: 'opwek', today: 'vandaag', daily: 'vandaag', total: 'totaal', t1: 'dal', t2: 'normaal',
+    l1: 'fase 1', l2: 'fase 2', l3: 'fase 3', inside: 'binnen', outside: 'buiten', indoor: 'binnen',
+    outdoor: 'buiten', floor: 'vloer', water: 'water', target: 'doel',
+  };
+
+  // Volgorde waarin capabilities in details en samenvattingen verschijnen.
+  const CAP_ORDER = [
+    'onoff', 'dim', 'light_temperature', 'light_hue', 'light_saturation', 'light_mode',
+    'target_temperature', 'measure_temperature', 'thermostat_mode', 'measure_humidity',
+    'windowcoverings_set', 'windowcoverings_state', 'windowcoverings_tilt_set',
+    'speaker_playing', 'speaker_track', 'speaker_artist', 'speaker_album', 'volume_set', 'volume_mute',
+    'locked', 'homealarm_state', 'garagedoor_closed',
+    'measure_power', 'meter_power', 'meter_gas', 'meter_water',
+  ];
+
+  function baseCap(id) {
+    return String(id).split('.')[0];
+  }
+
+  function capMeta(id) {
+    const base = baseCap(id);
+    const known = CAPS[id] || CAPS[base];
+    if (known) return known;
+    if (base.startsWith('alarm_')) return { label: humanize(base.slice(6)), kind: BOOL, on: 'Alarm', off: 'Rustig', alarm: 'warn' };
+    if (base.startsWith('measure_') || base.startsWith('meter_')) return { label: humanize(base.replace(/^(measure|meter)_/, '')), kind: NUM };
+    return null;
+  }
+
+  function humanize(s) {
+    const t = String(s || '').replace(/[_.]+/g, ' ').trim();
+    return t ? t.charAt(0).toUpperCase() + t.slice(1) : '';
+  }
+
+  function textOf(v) {
+    if (v == null) return '';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'object') return v.nl || v.en || Object.values(v).find((x) => typeof x === 'string') || '';
+    return String(v);
+  }
+
+  function capLabel(cap) {
+    const meta = capMeta(cap.id);
+    const parts = String(cap.id).split('.');
+    if (parts.length > 1) {
+      if (cap.title) return cap.title;
+      const suffix = parts.slice(1).map((p) => SUFFIX_LABEL[p.toLowerCase()] || p).join(' ');
+      return `${meta ? meta.label : humanize(parts[0])} (${suffix})`;
+    }
+    if (meta) return meta.label;
+    return cap.title || humanize(cap.id);
+  }
+
+  function inferKind(value) {
+    if (typeof value === 'boolean') return BOOL;
+    if (typeof value === 'number') return NUM;
+    if (typeof value === 'string') return STR;
+    return null;
+  }
+
+  function normalizeCap(id, src) {
+    const meta = capMeta(id) || {};
+    const isObj = src !== null && typeof src === 'object' && !Array.isArray(src);
+    const raw = isObj ? src : { value: src };
+    const value = 'value' in raw ? raw.value : undefined;
+    const cap = {
+      id,
+      value: value === undefined ? null : value,
+      title: textOf(raw.title) || null,
+      units: textOf(raw.units) || meta.unit || '',
+      kind: meta.kind || typeToKind(raw.type) || inferKind(value) || STR,
+      min: num(raw.min, meta.min),
+      max: num(raw.max, meta.max),
+      step: num(raw.step, meta.step),
+      decimals: num(raw.decimals, meta.decimals),
+      setable: typeof raw.setable === 'boolean' ? raw.setable : !!meta.setable,
+      getable: raw.getable !== false,
+      values: normalizeEnumValues(raw.values, meta.values),
+      lastUpdated: toTime(raw.lastUpdated || raw.last_updated || raw.updatedAt),
+    };
+    cap.fraction = !!meta.fraction && (cap.max == null || cap.max <= 1);
+    if (meta.kind === NUM && typeof cap.value === 'string' && cap.value.trim() !== '' && !isNaN(+cap.value)) cap.value = +cap.value;
+    return cap;
+  }
+
+  function typeToKind(t) {
+    if (t === 'boolean') return BOOL;
+    if (t === 'number') return NUM;
+    if (t === 'enum') return ENUM;
+    if (t === 'string') return STR;
+    return null;
+  }
+
+  function normalizeEnumValues(list, fallback) {
+    if (Array.isArray(list) && list.length) {
+      const out = {};
+      for (const v of list) {
+        if (v && typeof v === 'object') out[v.id] = (fallback && fallback[v.id]) || textOf(v.title) || String(v.id);
+        else out[v] = (fallback && fallback[v]) || String(v);
+      }
+      return out;
+    }
+    return fallback ? { ...fallback } : null;
+  }
+
+  function num(v, fallback) {
+    if (typeof v === 'number' && isFinite(v)) return v;
+    if (typeof v === 'string' && v.trim() !== '' && isFinite(+v)) return +v;
+    return fallback == null ? null : fallback;
+  }
+
+  function toTime(v) {
+    if (v == null || v === '') return null;
+    if (typeof v === 'number') return v < 1e12 ? v * 1000 : v;
+    const t = Date.parse(v);
+    return isNaN(t) ? null : t;
+  }
+
+  // ---------------------------------------------------------------- zones
+
+  function normalizeZones(payload) {
+    const list = [];
+    const byId = {};
+    for (const z of extractList(payload)) {
+      if (!z || typeof z !== 'object') continue;
+      const id = z.id || z.zoneId || z.uuid;
+      if (!id) continue;
+      const zone = { id: String(id), name: textOf(z.name) || 'Ruimte', parent: z.parent || z.parentId || null, order: list.length };
+      list.push(zone);
+      byId[zone.id] = zone;
+    }
+    return { list, byId };
+  }
+
+  // ---------------------------------------------------------------- devices
+
+  const UUIDISH = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+
+  function normalizeDevice(raw, zones) {
+    if (!raw || typeof raw !== 'object') return null;
+    const id = raw.id || raw.deviceId || raw.device_id || raw.uuid;
+    if (!id) return null;
+    const zoneIndex = (zones && zones.byId) || {};
+
+    let zoneId = null;
+    let zoneName = null;
+    if (raw.zone && typeof raw.zone === 'object') {
+      zoneId = raw.zone.id || null;
+      zoneName = textOf(raw.zone.name) || null;
+    } else if (typeof raw.zone === 'string') {
+      if (zoneIndex[raw.zone]) zoneId = raw.zone;
+      else if (!UUIDISH.test(raw.zone)) zoneName = raw.zone;
+      else zoneId = raw.zone;
+    }
+    zoneId = zoneId || raw.zoneId || raw.zone_id || null;
+    zoneName = zoneName || textOf(raw.zoneName || raw.zone_name || raw.room || raw.roomName) || null;
+    if (!zoneName && zoneId && zoneIndex[zoneId]) zoneName = zoneIndex[zoneId].name;
+
+    const caps = {};
+    const addCaps = (src) => {
+      if (!src) return;
+      if (Array.isArray(src)) {
+        for (const c of src) {
+          if (typeof c === 'string') { if (!caps[c]) caps[c] = normalizeCap(c, { value: null }); }
+          else if (c && typeof c === 'object' && (c.id || c.capability || c.capabilityId)) {
+            const cid = c.id || c.capability || c.capabilityId;
+            caps[cid] = normalizeCap(cid, c);
+          }
+        }
+        return;
+      }
+      if (typeof src === 'object') {
+        for (const [cid, v] of Object.entries(src)) {
+          const fresh = normalizeCap(cid, v);
+          caps[cid] = caps[cid] && fresh.value === null ? caps[cid] : fresh;
+        }
+      }
+    };
+    addCaps(raw.capabilitiesObj);
+    if (raw.capabilities && !Array.isArray(raw.capabilities)) addCaps(raw.capabilities);
+    for (const key of ['values', 'state', 'capabilityValues', 'capability_values', 'caps']) {
+      const v = raw[key];
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        for (const [cid, val] of Object.entries(v)) {
+          if (caps[cid]) {
+            const plain = val !== null && typeof val === 'object' && 'value' in val ? val.value : val;
+            if (plain === null || typeof plain !== 'object') caps[cid].value = plain;
+          } else caps[cid] = normalizeCap(cid, val);
+        }
+      }
+    }
+    if (Array.isArray(raw.capabilities)) addCaps(raw.capabilities);
+
+    const cls = String(raw.virtualClass || raw.class || raw.deviceClass || raw.device_class || 'other');
+    const available = !(raw.available === false || raw.unavailable === true || raw.status === 'unavailable' || raw.ready === false && raw.available == null);
+
+    const device = {
+      id: String(id),
+      name: textOf(raw.name) || 'Naamloos apparaat',
+      zoneId: zoneId ? String(zoneId) : null,
+      zoneName,
+      cls,
+      baseClass: String(raw.class || cls),
+      available,
+      unavailableMessage: textOf(raw.unavailableMessage || raw.unavailable_message) || null,
+      energy: raw.energyObj || raw.energy || null,
+      driver: textOf(raw.driverId || raw.driverUri || raw.driver) || null,
+      caps,
+      capOrder: orderCaps(Object.keys(caps)),
+      category: 'overig',
+    };
+    device.category = categorize(device);
+    return device;
+  }
+
+  function orderCaps(ids) {
+    const rank = (id) => {
+      const i = CAP_ORDER.indexOf(id);
+      if (i >= 0) return i;
+      const b = CAP_ORDER.indexOf(baseCap(id));
+      if (b >= 0) return b + 0.5;
+      if (id.startsWith('alarm_')) return 100;
+      if (id.startsWith('measure_')) return 200;
+      if (id.startsWith('meter_')) return 300;
+      return 400;
+    };
+    return ids.slice().sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  }
+
+  function normalizeDevices(payload, zones) {
+    const out = [];
+    const seen = new Set();
+    for (const raw of extractList(payload)) {
+      const d = normalizeDevice(raw, zones);
+      if (d && !seen.has(d.id)) {
+        seen.add(d.id);
+        out.push(d);
+      }
+    }
+    return out;
+  }
+
+  // Een compacte lijst draagt soms alleen waardes; de metadata van de laatste volledige lijst blijft staan.
+  function mergeDevices(prev, next, { dropMissing = false } = {}) {
+    const prevById = new Map((prev || []).map((d) => [d.id, d]));
+    const merged = [];
+    const seen = new Set();
+    for (const d of next) {
+      seen.add(d.id);
+      const old = prevById.get(d.id);
+      if (!old) { merged.push(d); continue; }
+      const caps = {};
+      for (const [cid, oldCap] of Object.entries(old.caps)) caps[cid] = { ...oldCap };
+      for (const [cid, cap] of Object.entries(d.caps)) {
+        if (caps[cid]) {
+          caps[cid].value = cap.value;
+          if (cap.lastUpdated) caps[cid].lastUpdated = cap.lastUpdated;
+        } else caps[cid] = cap;
+      }
+      const keepClass = d.cls === 'other' && old.cls !== 'other';
+      const m = {
+        ...old,
+        name: d.name || old.name,
+        available: d.available,
+        unavailableMessage: d.unavailableMessage,
+        zoneId: d.zoneId || old.zoneId,
+        zoneName: d.zoneName || old.zoneName,
+        cls: keepClass ? old.cls : d.cls,
+        baseClass: keepClass ? old.baseClass : d.baseClass,
+        energy: d.energy || old.energy,
+        caps,
+        capOrder: orderCaps(Object.keys(caps)),
+      };
+      m.category = categorize(m);
+      merged.push(m);
+    }
+    if (!dropMissing) for (const old of prev || []) if (!seen.has(old.id)) merged.push(old);
+    return merged;
+  }
+
+  // ---------------------------------------------------------------- indeling
+
+  const SECURITY_ALARMS = ['alarm_smoke', 'alarm_co', 'alarm_fire', 'alarm_heat'];
+  const SENSOR_ALARMS = ['alarm_motion', 'alarm_contact', 'alarm_vibration', 'alarm_water', 'alarm_tamper', 'alarm_presence', 'alarm_occupancy'];
+  const CLIMATE_MEASURES = ['measure_temperature', 'measure_humidity', 'measure_co2', 'measure_pm25', 'measure_pm10', 'measure_tvoc', 'measure_voc'];
+
+  function hasCap(d, id) {
+    return Object.prototype.hasOwnProperty.call(d.caps, id) || Object.keys(d.caps).some((c) => baseCap(c) === id);
+  }
+
+  function capValue(d, id) {
+    if (d.caps[id]) return d.caps[id].value;
+    const key = Object.keys(d.caps).find((c) => baseCap(c) === id);
+    return key ? d.caps[key].value : null;
+  }
+
+  function isMeterDevice(d) {
+    const name = d.name.toLowerCase();
+    return !!(d.energy && (d.energy.cumulative === true || d.energy.cumulativeImportedCapability))
+      || /\b(p1|slimme meter|smart ?meter|energiemeter|kwh[- ]?meter|hoofdmeter)\b/.test(name)
+      || d.cls === 'meter';
+  }
+
+  function categorize(d) {
+    const direct = CLASS_TO_CATEGORY[d.cls] || CLASS_TO_CATEGORY[d.baseClass];
+    if (direct && !(d.cls === 'other' || d.cls === 'sensor')) return direct;
+
+    if (SECURITY_ALARMS.some((c) => hasCap(d, c))) return 'beveiliging';
+    if (hasCap(d, 'locked') || hasCap(d, 'homealarm_state') || hasCap(d, 'garagedoor_closed')) return 'beveiliging';
+    if (d.cls === 'sensor') {
+      if (SENSOR_ALARMS.some((c) => hasCap(d, c))) return 'sensoren';
+      if (isMeterDevice(d) || hasCap(d, 'meter_gas') || hasCap(d, 'meter_water') || (hasCap(d, 'meter_power') && !hasCap(d, 'onoff'))) return 'energie';
+      if (CLIMATE_MEASURES.some((c) => hasCap(d, c))) return 'klimaat';
+      return 'sensoren';
+    }
+    // Klasse 'other' of onbekend: lees het af aan wat het apparaat kan.
+    if (hasCap(d, 'dim') || hasCap(d, 'light_hue') || hasCap(d, 'light_temperature')) return 'verlichting';
+    if (hasCap(d, 'target_temperature')) return 'klimaat';
+    if (hasCap(d, 'windowcoverings_set') || hasCap(d, 'windowcoverings_state')) return 'zonwering';
+    if (hasCap(d, 'speaker_playing') || hasCap(d, 'volume_set')) return 'media';
+    if (SENSOR_ALARMS.some((c) => hasCap(d, c))) return 'sensoren';
+    if (isMeterDevice(d) || hasCap(d, 'meter_gas') || hasCap(d, 'meter_water')) return 'energie';
+    if (hasCap(d, 'onoff')) return 'schakelaars';
+    if (CLIMATE_MEASURES.some((c) => hasCap(d, c))) return 'klimaat';
+    if (hasCap(d, 'measure_power') || hasCap(d, 'meter_power')) return 'energie';
+    return 'overig';
+  }
+
+  function deviceIcon(d) {
+    if (CLASS_ICON[d.cls]) return CLASS_ICON[d.cls];
+    if (hasCap(d, 'alarm_contact')) return 'door';
+    if (hasCap(d, 'alarm_motion')) return 'motion';
+    if (hasCap(d, 'alarm_water')) return 'drop';
+    if (hasCap(d, 'measure_temperature')) return 'thermo';
+    if (hasCap(d, 'measure_power') || hasCap(d, 'meter_power')) return 'bolt';
+    return (CATEGORY_BY_ID[d.category] || CATEGORY_BY_ID.overig).icon;
+  }
+
+  // Welke vorm de tegel krijgt.
+  function tileKind(d) {
+    if (hasCap(d, 'homealarm_state')) return 'alarm';
+    if (hasCap(d, 'locked')) return 'lock';
+    if (d.category === 'verlichting') return 'light';
+    if (hasCap(d, 'target_temperature')) return 'thermostat';
+    if (hasCap(d, 'windowcoverings_set') || hasCap(d, 'windowcoverings_state')) return 'cover';
+    if (hasCap(d, 'speaker_playing') || (d.category === 'media' && hasCap(d, 'volume_set'))) return 'media';
+    if (d.category === 'energie') return 'energy';
+    if (toggleCapability(d)) return 'switch';
+    return 'sensor';
+  }
+
+  function toggleCapability(d) {
+    for (const id of ['onoff', 'garagedoor_closed', 'evcharger_charging', 'windowcoverings_closed']) {
+      const cap = d.caps[id];
+      if (cap && cap.setable && cap.kind === BOOL) return id;
+    }
+    return null;
+  }
+
+  // ---------------------------------------------------------------- opmaak
+
+  const nfCache = new Map();
+  function fmtNumber(v, decimals) {
+    const key = decimals;
+    if (!nfCache.has(key)) nfCache.set(key, new Intl.NumberFormat('nl-NL', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }));
+    return nfCache.get(key).format(v);
+  }
+
+  function fmtPower(watts) {
+    const abs = Math.abs(watts);
+    if (abs >= 1000) return { text: fmtNumber(watts / 1000, abs >= 10000 ? 1 : 2), unit: 'kW' };
+    return { text: fmtNumber(watts, 0), unit: 'W' };
+  }
+
+  function formatCap(cap) {
+    const v = cap.value;
+    if (v === null || v === undefined || v === '') return { text: '—', unit: '' };
+    const meta = capMeta(cap.id) || {};
+    if (cap.kind === BOOL || typeof v === 'boolean') {
+      const on = v === true || v === 'true' || v === 1;
+      return { text: on ? meta.on || 'Ja' : meta.off || 'Nee', unit: '' };
+    }
+    if (cap.kind === ENUM) {
+      const label = (cap.values && cap.values[v]) || (meta.values && meta.values[v]);
+      return { text: label || humanize(v), unit: '' };
+    }
+    if (typeof v === 'number') {
+      if (cap.fraction) return { text: fmtNumber(Math.round(v * 100), 0), unit: '%' };
+      if (meta.power && (cap.units === 'W' || !cap.units)) return fmtPower(v);
+      const decimals = cap.decimals != null ? Math.min(cap.decimals, 3) : Number.isInteger(v) ? 0 : 1;
+      return { text: fmtNumber(v, decimals), unit: cap.units || '' };
+    }
+    return { text: String(v), unit: '' };
+  }
+
+  function formatFull(cap) {
+    const f = formatCap(cap);
+    if (!f.unit) return f.text;
+    return f.unit === '%' || f.unit === '°' ? f.text + f.unit : `${f.text} ${f.unit}`;
+  }
+
+  const SUMMARY_MEASURES = [
+    'measure_temperature', 'measure_power', 'measure_humidity', 'measure_co2', 'measure_luminance',
+    'measure_pm25', 'measure_noise', 'measure_wind_strength', 'measure_rain', 'measure_pressure',
+    'meter_power', 'meter_gas', 'meter_water', 'measure_battery',
+  ];
+
+  function firstCap(d, ids) {
+    for (const id of ids) {
+      if (d.caps[id] && d.caps[id].value != null) return d.caps[id];
+      const key = Object.keys(d.caps).find((c) => baseCap(c) === id && d.caps[c].value != null);
+      if (key) return d.caps[key];
+    }
+    return null;
+  }
+
+  function activeAlarms(d) {
+    const out = [];
+    for (const cap of Object.values(d.caps)) {
+      if (!baseCap(cap.id).startsWith('alarm_') || cap.value !== true) continue;
+      const meta = capMeta(cap.id) || {};
+      out.push({ cap, severity: meta.alarm || null, text: meta.on || capLabel(cap) });
+    }
+    const rank = { crit: 0, warn: 1 };
+    return out.sort((a, b) => (rank[a.severity] ?? 2) - (rank[b.severity] ?? 2));
+  }
+
+  function batteryLevel(d) {
+    const v = capValue(d, 'measure_battery');
+    return typeof v === 'number' ? v : null;
+  }
+
+  // Wat een tegel in één oogopslag laat zien.
+  function deviceSummary(d) {
+    const kind = tileKind(d);
+    const on = capValue(d, 'onoff');
+    const res = { headline: '—', unit: '', sub: '', tone: 'neutral', on: false, level: null };
+    const sub = [];
+
+    if (!d.available) {
+      res.tone = 'offline';
+      res.headline = 'Offline';
+      res.sub = d.unavailableMessage || 'Niet bereikbaar';
+      return res;
+    }
+
+    const alarms = activeAlarms(d);
+    const loud = alarms.find((a) => a.severity === 'crit' || a.severity === 'warn');
+
+    switch (kind) {
+      case 'light': {
+        const dim = capValue(d, 'dim');
+        res.on = on !== false && (on === true || (typeof dim === 'number' && dim > 0));
+        if (res.on) {
+          res.tone = 'lit';
+          res.level = typeof dim === 'number' ? clamp(dim, 0.04, 1) : 1;
+          if (typeof dim === 'number') { res.headline = fmtNumber(Math.round(dim * 100), 0); res.unit = '%'; }
+          else res.headline = 'Aan';
+        } else {
+          res.tone = 'off';
+          res.headline = 'Uit';
+        }
+        break;
+      }
+      case 'thermostat': {
+        const cur = firstCap(d, ['measure_temperature']);
+        const target = d.caps.target_temperature;
+        const shown = cur || target;
+        if (shown) { const f = formatCap(shown); res.headline = f.text; res.unit = f.unit; }
+        if (target && target.value != null) sub.push(`Doel ${formatFull(target)}`);
+        const mode = d.caps.thermostat_mode;
+        if (mode && mode.value != null) sub.push(formatCap(mode).text);
+        const hum = firstCap(d, ['measure_humidity']);
+        if (hum && cur) sub.push(formatFull(hum));
+        const heating = cur && target && typeof cur.value === 'number' && typeof target.value === 'number' && target.value - cur.value >= 0.3;
+        res.tone = on === false || (mode && mode.value === 'off') ? 'off' : heating ? 'heat' : 'calm';
+        res.on = heating;
+        break;
+      }
+      case 'cover': {
+        const pos = capValue(d, 'windowcoverings_set');
+        const st = capValue(d, 'windowcoverings_state');
+        if (st === 'up' || st === 'down') { res.headline = st === 'up' ? 'Gaat omhoog' : 'Gaat omlaag'; res.tone = 'active'; }
+        if (typeof pos === 'number') {
+          const pct = Math.round(pos * 100);
+          if (res.tone !== 'active') { res.headline = pct >= 99 ? 'Open' : pct <= 1 ? 'Dicht' : fmtNumber(pct, 0); res.unit = pct > 1 && pct < 99 ? '% open' : ''; }
+          else sub.push(`${fmtNumber(pct, 0)}% open`);
+          res.level = pos;
+          res.on = pct > 1;
+          if (res.tone !== 'active') res.tone = res.on ? 'open' : 'off';
+        } else if (res.tone !== 'active') {
+          const closed = capValue(d, 'windowcoverings_closed');
+          res.headline = closed === true ? 'Dicht' : closed === false ? 'Open' : 'Stil';
+          res.tone = 'neutral';
+        }
+        break;
+      }
+      case 'media': {
+        const playing = capValue(d, 'speaker_playing');
+        const track = capValue(d, 'speaker_track');
+        const artist = capValue(d, 'speaker_artist');
+        if (on === false) { res.headline = 'Uit'; res.tone = 'off'; }
+        else if (playing === true) { res.headline = 'Speelt'; res.tone = 'active'; res.on = true; }
+        else if (playing === false) { res.headline = 'Gepauzeerd'; res.tone = 'off'; }
+        else { res.headline = on === true ? 'Aan' : '—'; res.tone = on === true ? 'active' : 'neutral'; res.on = on === true; }
+        if (track) sub.push(artist ? `${track} · ${artist}` : String(track));
+        const vol = capValue(d, 'volume_set');
+        if (!track && typeof vol === 'number' && on !== false) sub.push(`Volume ${fmtNumber(Math.round(vol * 100), 0)}%`);
+        break;
+      }
+      case 'lock': {
+        const locked = capValue(d, 'locked');
+        res.headline = locked === true ? 'Vergrendeld' : locked === false ? 'Ontgrendeld' : '—';
+        res.tone = locked === true ? 'secure' : locked === false ? 'warn' : 'neutral';
+        res.on = locked === true;
+        break;
+      }
+      case 'alarm': {
+        const st = capValue(d, 'homealarm_state');
+        res.headline = formatCap(d.caps.homealarm_state || { id: 'homealarm_state', value: st, kind: ENUM }).text;
+        res.tone = st === 'armed' ? 'secure' : st === 'partially_armed' ? 'active' : 'off';
+        res.on = st === 'armed' || st === 'partially_armed';
+        break;
+      }
+      case 'energy': {
+        const power = firstCap(d, ['measure_power']);
+        const pct = capValue(d, 'measure_battery');
+        if (d.cls === 'battery' && typeof pct === 'number') {
+          res.headline = fmtNumber(pct, 0); res.unit = '%';
+          res.level = clamp(pct / 100, 0, 1);
+          if (power && typeof power.value === 'number' && power.value !== 0) sub.push(`${power.value > 0 ? 'Laadt' : 'Ontlaadt'} ${formatFull({ ...power, value: Math.abs(power.value) })}`);
+        } else if (power) {
+          const f = formatCap(power); res.headline = f.text; res.unit = f.unit;
+          if (d.cls === 'solarpanel') sub.push('Opwek nu');
+        } else {
+          const meter = firstCap(d, ['meter_power', 'meter_gas', 'meter_water']);
+          if (meter) { const f = formatCap(meter); res.headline = f.text; res.unit = f.unit; }
+        }
+        for (const id of ['meter_power', 'meter_gas', 'meter_water']) {
+          const c = d.caps[id];
+          if (c && c.value != null && !(res.unit === c.units && !power)) sub.push(formatFull(c));
+        }
+        if (on === false) { res.tone = 'off'; sub.unshift('Uit'); }
+        else res.tone = power && typeof power.value === 'number' && Math.abs(power.value) > 1 ? 'active' : 'calm';
+        res.on = res.tone === 'active';
+        break;
+      }
+      case 'switch': {
+        const tcap = toggleCapability(d);
+        const v = capValue(d, tcap);
+        res.headline = formatCap(d.caps[tcap]).text;
+        res.on = tcap === 'garagedoor_closed' ? v === false : v === true;
+        res.tone = res.on ? 'active' : 'off';
+        const power = firstCap(d, ['measure_power']);
+        if (power && (res.on || power.value)) sub.push(formatFull(power));
+        break;
+      }
+      default: {
+        const measure = firstCap(d, SUMMARY_MEASURES.filter((m) => m !== 'measure_battery' || Object.keys(d.caps).length === 1));
+        const primaryAlarm = alarms[0];
+        if (loud) {
+          res.headline = loud.text;
+          res.tone = loud.severity === 'crit' ? 'crit' : 'warn';
+          if (measure) sub.push(formatFull(measure));
+        } else if (measure) {
+          const f = formatCap(measure); res.headline = f.text; res.unit = f.unit;
+          if (primaryAlarm) sub.push(primaryAlarm.text);
+          res.tone = primaryAlarm ? 'active' : 'calm';
+          const second = firstCap(d, SUMMARY_MEASURES.filter((m) => baseCap(m) !== baseCap(measure.id) && m !== 'measure_battery'));
+          if (second) sub.push(formatFull(second));
+        } else {
+          const boolCap = Object.values(d.caps).find((c) => c.kind === BOOL && c.value != null);
+          if (boolCap) { res.headline = formatCap(boolCap).text; res.tone = boolCap.value ? 'active' : 'calm'; }
+          else {
+            const anyCap = Object.values(d.caps).find((c) => c.value != null && c.kind !== BTN);
+            if (anyCap) { const f = formatCap(anyCap); res.headline = f.text; res.unit = f.unit; }
+            else res.headline = Object.keys(d.caps).length ? 'Geen waarde' : 'Geen gegevens';
+            res.tone = 'calm';
+          }
+        }
+        res.on = res.tone === 'active';
+      }
+    }
+
+    if (loud && kind !== 'sensor') {
+      res.tone = loud.severity === 'crit' ? 'crit' : 'warn';
+      sub.unshift(loud.text);
+    }
+    const battery = batteryLevel(d);
+    if (battery != null && battery <= 15 && kind !== 'energy') sub.push(`Batterij ${fmtNumber(battery, 0)}%`);
+    res.sub = sub.filter(Boolean).slice(0, 2).join(' · ');
+    return res;
+  }
+
+  function clamp(v, lo, hi) {
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  // ---------------------------------------------------------------- overzicht
+
+  const LOW_BATTERY = 15;
+
+  function attentionItems(devices) {
+    const items = [];
+    for (const d of devices) {
+      if (!d.available) {
+        items.push({ device: d, severity: 'muted', text: 'niet bereikbaar' });
+        continue;
+      }
+      const alarms = activeAlarms(d).filter((a) => a.severity);
+      for (const a of alarms) items.push({ device: d, severity: a.severity, text: a.text.toLowerCase() });
+      const battery = batteryLevel(d);
+      if (battery != null && battery <= LOW_BATTERY && !alarms.some((a) => baseCap(a.cap.id) === 'alarm_battery')) {
+        items.push({ device: d, severity: 'warn', text: `batterij ${fmtNumber(battery, 0)}%` });
+      }
+      if (capValue(d, 'locked') === false) items.push({ device: d, severity: 'info', text: 'ontgrendeld' });
+      if (capValue(d, 'garagedoor_closed') === false) items.push({ device: d, severity: 'info', text: 'open' });
+    }
+    const rank = { crit: 0, warn: 1, info: 2, muted: 3 };
+    return items.sort((a, b) => rank[a.severity] - rank[b.severity] || a.device.name.localeCompare(b.device.name, 'nl'));
+  }
+
+  // Zonder woordgrens aan het eind: Nederlandse samenstellingen als 'Buitensensor' of 'Achtertuin' tellen mee.
+  const OUTDOOR = /(buiten|tuin|outdoor|garden|terras|balkon|veranda|oprit|weather|\bweer\b)/i;
+
+  function isOutdoor(d) {
+    return OUTDOOR.test(d.name) || (d.zoneName && OUTDOOR.test(d.zoneName));
+  }
+
+  function overview(devices) {
+    const live = devices.filter((d) => d.available);
+    const lights = devices.filter((d) => d.category === 'verlichting');
+    const lightsOn = lights.filter((d) => d.available && deviceSummary(d).on).length;
+
+    const indoorTemps = [];
+    let outdoor = null;
+    for (const d of live) {
+      if (!['klimaat', 'sensoren', 'beveiliging'].includes(d.category)) continue;
+      const t = capValue(d, 'measure_temperature');
+      if (typeof t !== 'number') continue;
+      if (isOutdoor(d)) { if (outdoor == null) outdoor = { value: t, device: d }; continue; }
+      indoorTemps.push(t);
+    }
+    const indoor = indoorTemps.length
+      ? { avg: indoorTemps.reduce((s, v) => s + v, 0) / indoorTemps.length, min: Math.min(...indoorTemps), max: Math.max(...indoorTemps), count: indoorTemps.length }
+      : null;
+
+    const withPower = live.filter((d) => typeof capValue(d, 'measure_power') === 'number');
+    const meters = withPower.filter(isMeterDevice);
+    let power = null;
+    if (meters.length) power = { watts: meters.reduce((s, d) => s + capValue(d, 'measure_power'), 0), source: 'meter', count: meters.length };
+    else {
+      const consumers = withPower.filter((d) => !['solarpanel', 'battery', 'inverter'].includes(d.cls));
+      if (consumers.length) power = { watts: consumers.reduce((s, d) => s + Math.max(0, capValue(d, 'measure_power')), 0), source: 'sum', count: consumers.length };
+    }
+    const solarDevices = withPower.filter((d) => d.cls === 'solarpanel');
+    const solar = solarDevices.length ? { watts: solarDevices.reduce((s, d) => s + Math.abs(capValue(d, 'measure_power')), 0) } : null;
+
+    const attention = attentionItems(devices);
+    return {
+      total: devices.length,
+      lights: { on: lightsOn, total: lights.length },
+      indoor,
+      outdoor,
+      power,
+      solar,
+      attention,
+      attentionCount: attention.filter((a) => a.severity === 'crit' || a.severity === 'warn').length,
+      critical: attention.filter((a) => a.severity === 'crit').length,
+    };
+  }
+
+  function groupMeta(items, groupId) {
+    const n = items.length;
+    const base = `${n} ${n === 1 ? 'apparaat' : 'apparaten'}`;
+    const live = items.filter((d) => d.available);
+    if (groupId === 'verlichting') {
+      const on = live.filter((d) => deviceSummary(d).on).length;
+      return on ? `${on} van ${n} aan` : `alle ${n} uit`;
+    }
+    if (groupId === 'klimaat') {
+      const temps = live.map((d) => capValue(d, 'measure_temperature')).filter((t) => typeof t === 'number');
+      if (temps.length) return `${base} · gem. ${fmtNumber(temps.reduce((s, v) => s + v, 0) / temps.length, 1)} °C`;
+    }
+    if (groupId === 'beveiliging' || groupId === 'sensoren') {
+      const open = live.filter((d) => capValue(d, 'alarm_contact') === true || capValue(d, 'locked') === false).length;
+      const alarm = live.filter((d) => activeAlarms(d).some((a) => a.severity === 'crit')).length;
+      if (alarm) return `${base} · ${alarm} alarm`;
+      if (open) return `${base} · ${open} open`;
+    }
+    if (groupId === 'energie') {
+      const w = live.filter((d) => !isMeterDevice(d) && d.cls !== 'solarpanel').map((d) => capValue(d, 'measure_power')).filter((x) => typeof x === 'number');
+      if (w.length) { const p = fmtPower(w.reduce((s, v) => s + Math.max(0, v), 0)); return `${base} · ${p.text} ${p.unit} in gebruik`; }
+    }
+    if (['schakelaars', 'media', 'huishouden'].includes(groupId)) {
+      const on = live.filter((d) => deviceSummary(d).on).length;
+      if (on) return `${base} · ${on} aan`;
+    }
+    const offline = items.length - live.length;
+    return offline ? `${base} · ${offline} offline` : base;
+  }
+
+  // ---------------------------------------------------------------- MCP-resultaten
+
+  function extractPayload(result) {
+    if (result == null) return null;
+    if (result.structuredContent != null) return result.structuredContent;
+    const content = Array.isArray(result.content) ? result.content : null;
+    if (content) {
+      const texts = content.filter((c) => c && c.type === 'text' && typeof c.text === 'string').map((c) => c.text);
+      for (const t of texts) {
+        const s = t.trim();
+        if (s.startsWith('{') || s.startsWith('[')) {
+          try { return JSON.parse(s); } catch (e) { /* geen JSON */ }
+        }
+      }
+      const resource = content.find((c) => c && c.type === 'resource' && c.resource && typeof c.resource.text === 'string');
+      if (resource) { try { return JSON.parse(resource.resource.text); } catch (e) { /* geen JSON */ } }
+      return texts.join('\n');
+    }
+    return result;
+  }
+
+  const LIST_KEYS = ['items', 'devices', 'zones', 'moods', 'results', 'data', 'list', 'records', 'entries', 'value'];
+
+  function looksLikeEntity(o) {
+    return o && typeof o === 'object' && !Array.isArray(o) && ('id' in o || 'deviceId' in o || 'uuid' in o) && ('name' in o || 'class' in o || 'capabilities' in o);
+  }
+
+  function extractList(payload, depth = 0) {
+    if (payload == null || depth > 4) return [];
+    if (Array.isArray(payload)) return payload;
+    if (typeof payload !== 'object') return [];
+    for (const key of LIST_KEYS) {
+      const v = payload[key];
+      if (Array.isArray(v)) return v;
+      if (v && typeof v === 'object') {
+        const inner = extractList(v, depth + 1);
+        if (inner.length) return inner;
+      }
+    }
+    const values = Object.values(payload);
+    if (values.length && values.every(looksLikeEntity)) return values;
+    for (const v of values) {
+      if (Array.isArray(v) && v.length && v.every((x) => x && typeof x === 'object')) return v;
+    }
+    return [];
+  }
+
+  // ---------------------------------------------------------------- tools herkennen
+
+  const TOOL_NAMES = {
+    listDevices: ['devices_list', 'list_devices', 'homey_devices_list', 'get_devices', 'devices_get_all', 'device_list', 'devices'],
+    setCapability: ['devices_set_capability', 'device_set_capability', 'set_capability', 'set_device_capability', 'devices_set_capability_value', 'device_capability_set', 'capability_set', 'devices_control', 'device_control', 'control_device'],
+    getDevice: ['devices_get', 'device_get', 'get_device', 'devices_get_state', 'device_get_state', 'devices_state', 'device_state'],
+    listZones: ['zones_list', 'list_zones', 'homey_zones_list', 'get_zones', 'zone_list'],
+    listMoods: ['moods_list', 'list_moods', 'mood_list', 'homey_moods_list'],
+    activateMood: ['moods_activate', 'mood_activate', 'activate_mood', 'moods_set_active', 'moods_run'],
+  };
+
+  const TOOL_PATTERNS = {
+    listDevices: { must: /device/, any: /list|all|get_devices/, not: /zone|flow|capab|setting|driver|group|energy|insight|log|icon|event|watch|resolve|history|card|widget|dashboard|offline|battery/ },
+    setCapability: { must: /capab|control/, any: /set|control|write|change/, not: /setting|icon|rename|zone|insight|log|list|watch|subscribe|flow|describe|guardrail|history/ },
+    getDevice: { must: /device/, any: /get|state|read/, not: /list|zone|flow|setting|insight|log|icon|history|driver|resolve/ },
+    listZones: { must: /zone/, any: /list|all/, not: /device|activity|flow/ },
+    listMoods: { must: /mood/, any: /list|all/, not: /create|update|delete|activate/ },
+    activateMood: { must: /mood/, any: /activate|run|set_active|trigger|start/, not: /list|create|update|delete/ },
+  };
+
+  function schemaProps(tool) {
+    return (tool && tool.inputSchema && tool.inputSchema.properties) || {};
+  }
+
+  function findKey(props, candidates) {
+    const keys = Object.keys(props);
+    for (const c of candidates) if (keys.includes(c)) return c;
+    const lower = keys.map((k) => k.toLowerCase());
+    for (const c of candidates) {
+      const i = lower.indexOf(c.toLowerCase());
+      if (i >= 0) return keys[i];
+    }
+    return null;
+  }
+
+  const ID_KEYS = ['deviceId', 'device_id', 'id', 'device', 'uuid', 'deviceID'];
+  const NAME_KEYS = ['device_name', 'deviceName', 'name'];
+  const CAP_KEYS = ['capabilityId', 'capability_id', 'capability', 'capabilityID', 'cap'];
+  const VALUE_KEYS = ['value', 'val', 'state', 'newValue', 'new_value'];
+
+  function scoreTool(role, tool) {
+    const name = String(tool.name || '').toLowerCase();
+    const props = schemaProps(tool);
+    const required = (tool.inputSchema && tool.inputSchema.required) || [];
+    let score = 0;
+    const exact = TOOL_NAMES[role].indexOf(name);
+    if (exact >= 0) score = 1000 - exact;
+    else {
+      const p = TOOL_PATTERNS[role];
+      if (!p.must.test(name) || !p.any.test(name) || p.not.test(name)) return 0;
+      score = 100;
+    }
+    if (role === 'listDevices' || role === 'listZones' || role === 'listMoods') {
+      if (required.length) score -= 60;
+    }
+    if (role === 'setCapability') {
+      if (findKey(props, CAP_KEYS)) score += 20; else if (exact < 0) score -= 40;
+      if (findKey(props, VALUE_KEYS)) score += 20; else if (exact < 0) score -= 40;
+      if (findKey(props, ID_KEYS) || findKey(props, NAME_KEYS)) score += 10;
+    }
+    if (role === 'getDevice' && !(findKey(props, ID_KEYS) || findKey(props, NAME_KEYS))) score -= 60;
+    if (role === 'activateMood' && !findKey(props, ['moodId', 'mood_id', 'id', 'mood', 'name'])) score -= 60;
+    return score;
+  }
+
+  function pickTools(tools) {
+    const out = {};
+    for (const role of Object.keys(TOOL_NAMES)) {
+      let best = null;
+      let bestScore = 0;
+      for (const t of tools || []) {
+        const s = scoreTool(role, t);
+        if (s > bestScore) { best = t; bestScore = s; }
+      }
+      out[role] = best;
+    }
+    return out;
+  }
+
+  function listArgs(tool, { detailed = true } = {}) {
+    const props = schemaProps(tool);
+    const args = {};
+    for (const key of ['detailed', 'detail', 'verbose', 'full', 'include_capabilities', 'includeCapabilities', 'include_values', 'with_capabilities', 'include_state']) {
+      if (props[key] && props[key].type === 'boolean') args[key] = key.startsWith('include') || key.startsWith('with') ? true : detailed;
+    }
+    if (props.compact && props.compact.type === 'boolean') args.compact = !detailed;
+    for (const key of ['limit', 'max_results', 'maxResults', 'page_size', 'pageSize', 'per_page']) {
+      const p = props[key];
+      if (p && (p.type === 'integer' || p.type === 'number')) args[key] = p.maximum != null ? p.maximum : 1000;
+    }
+    return args;
+  }
+
+  function nextPageArgs(tool, args, payload, received) {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload) || !received) return null;
+    const props = schemaProps(tool);
+    const cursor = payload.next_cursor || payload.nextCursor || payload.next || payload.cursor_next || null;
+    if (cursor && typeof cursor === 'string') {
+      const key = findKey(props, ['cursor', 'after', 'page_token', 'pageToken', 'next_cursor']);
+      if (key) return { ...args, [key]: cursor };
+    }
+    const truncated = payload.truncated === true || payload.has_more === true || payload.hasMore === true;
+    const offsetKey = findKey(props, ['offset', 'skip', 'start']);
+    if (truncated && offsetKey) return { ...args, [offsetKey]: (args[offsetKey] || 0) + received };
+    const pageKey = findKey(props, ['page']);
+    if (truncated && pageKey) return { ...args, [pageKey]: (args[pageKey] || 1) + 1 };
+    return null;
+  }
+
+  function deviceRefArgs(tool, device) {
+    const props = schemaProps(tool);
+    const args = {};
+    const idKey = findKey(props, ID_KEYS);
+    const nameKey = idKey ? null : findKey(props, NAME_KEYS);
+    if (idKey) args[idKey] = device.id;
+    else if (nameKey) args[nameKey] = device.name;
+    else args.deviceId = device.id;
+    return args;
+  }
+
+  function setCapabilityArgs(tool, device, capId, value) {
+    const props = schemaProps(tool);
+    const args = deviceRefArgs(tool, device);
+    const capKey = findKey(props, CAP_KEYS) || 'capabilityId';
+    const valKey = findKey(props, VALUE_KEYS) || 'value';
+    args[capKey] = capId;
+    const vp = props[valKey];
+    const types = vp ? [].concat(vp.type || []) : [];
+    args[valKey] = types.length === 1 && types[0] === 'string' && typeof value !== 'string' ? String(value) : value;
+    return args;
+  }
+
+  function moodArgs(tool, mood) {
+    const props = schemaProps(tool);
+    const idKey = findKey(props, ['moodId', 'mood_id', 'id', 'mood']);
+    if (idKey) return { [idKey]: mood.id };
+    const nameKey = findKey(props, ['name', 'mood_name']);
+    return nameKey ? { [nameKey]: mood.name } : { id: mood.id };
+  }
+
+  function normalizeMoods(payload) {
+    return extractList(payload)
+      .filter((m) => m && typeof m === 'object' && (m.id || m.name))
+      .map((m) => ({ id: String(m.id || m.name), name: textOf(m.name) || 'Sfeer', zoneName: textOf(m.zoneName || (m.zone && m.zone.name)) || null }));
+  }
+
+  // Waarde die bij een schuif of knop hoort, terug naar de eenheid van Homey.
+  function sliderToValue(cap, sliderValue) {
+    const n = Number(sliderValue);
+    if (cap.fraction) return clamp(Math.round(n) / 100, 0, 1);
+    return n;
+  }
+
+  function valueToSlider(cap) {
+    const v = typeof cap.value === 'number' ? cap.value : 0;
+    return cap.fraction ? Math.round(v * 100) : v;
+  }
+
+  function sliderRange(cap) {
+    if (cap.fraction) return { min: 0, max: 100, step: 1 };
+    const min = cap.min != null ? cap.min : 0;
+    const max = cap.max != null ? cap.max : 100;
+    const step = cap.step != null ? cap.step : cap.decimals === 0 ? 1 : (max - min) <= 50 ? 0.5 : 1;
+    return { min, max, step };
+  }
+
+  const api = {
+    CATEGORIES, CATEGORY_BY_ID, CLASS_TO_CATEGORY, CAPS,
+    baseCap, capMeta, capLabel, normalizeCap, normalizeZones, normalizeDevice, normalizeDevices, mergeDevices,
+    categorize, deviceIcon, tileKind, toggleCapability, hasCap, capValue, isMeterDevice, isOutdoor,
+    fmtNumber, fmtPower, formatCap, formatFull, deviceSummary, activeAlarms, attentionItems, overview, groupMeta,
+    extractPayload, extractList, pickTools, scoreTool, listArgs, nextPageArgs, deviceRefArgs, setCapabilityArgs,
+    moodArgs, normalizeMoods, sliderToValue, valueToSlider, sliderRange, clamp,
+  };
+
+  root.HDCore = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/*
+ * Homey Dashboard: minimale MCP-client (JSON-RPC over Streamable HTTP).
+ * Praat met het /mcp-endpoint van MCP AI Bridge. Werkt in de browser en in Node 18+.
+ */
+(function (root) {
+  'use strict';
+
+  const PROTOCOL = '2025-11-25';
+
+  class McpError extends Error {
+    constructor(message, info) {
+      super(message);
+      this.name = 'McpError';
+      Object.assign(this, info || {});
+    }
+  }
+
+  function parseSse(text) {
+    const messages = [];
+    for (const block of String(text).split(/\r?\n\r?\n/)) {
+      const data = block
+        .split(/\r?\n/)
+        .filter((line) => line.startsWith('data:'))
+        .map((line) => line.slice(5).replace(/^ /, ''))
+        .join('\n');
+      if (!data) continue;
+      try { messages.push(JSON.parse(data)); } catch (e) { /* keep-alive of geen JSON */ }
+    }
+    return messages;
+  }
+
+  function httpMessage(status, body) {
+    const detail = String(body || '').replace(/\s+/g, ' ').trim().slice(0, 160);
+    const tail = detail ? ` (${detail})` : '';
+    switch (status) {
+      case 401: return 'De bridge vraagt om een geldige API-sleutel (401). Vul de sleutel in bij Instellingen.';
+      case 403: return `De bridge weigert deze verbinding (403)${tail}. Controleer de sleutel, de toegangsmodus en de IP-whitelist in de app.`;
+      case 404: return 'Op dit adres zit geen MCP-endpoint (404). Het adres eindigt op /mcp, bijvoorbeeld http://192.168.1.50:52199/mcp.';
+      case 405: return 'Dit adres accepteert geen MCP-verzoeken (405). Gebruik het /mcp-adres van de bridge.';
+      case 429: return 'Te veel verzoeken (429). Verhoog het verversinterval of de rate limit op de Security-tab.';
+      default: return `De bridge antwoordde met HTTP ${status}${tail}.`;
+    }
+  }
+
+  class McpClient {
+    constructor(options) {
+      const o = options || {};
+      this.url = o.url;
+      this.apiKey = o.apiKey || '';
+      this.fetch = o.fetchImpl || root.fetch.bind(root);
+      this.clientName = o.clientName || 'homey-dashboard';
+      this.clientVersion = o.clientVersion || '1.0.0';
+      this.timeoutMs = o.timeoutMs || 20000;
+      this.sessionId = null;
+      this.protocolVersion = null;
+      this.serverInfo = null;
+      this.instructions = null;
+      this.tools = null;
+      this._id = 0;
+    }
+
+    async _post(body, method) {
+      const headers = { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' };
+      if (this.apiKey) headers.Authorization = `Bearer ${this.apiKey}`;
+      if (this.sessionId) headers['Mcp-Session-Id'] = this.sessionId;
+      if (this.protocolVersion) headers['MCP-Protocol-Version'] = this.protocolVersion;
+      const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), this.timeoutMs) : null;
+      let res;
+      try {
+        const init = { method: 'POST', headers, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined };
+        if (typeof window !== 'undefined') init.cache = 'no-store';
+        res = await this.fetch(this.url, init);
+      } catch (err) {
+        const aborted = err && (err.name === 'AbortError' || err.name === 'TimeoutError');
+        throw new McpError(
+          aborted
+            ? `De bridge reageerde niet binnen ${Math.round(this.timeoutMs / 1000)} seconden (${method}).`
+            : 'Geen verbinding met de bridge. Klopt het adres, staat je Homey aan en zit dit apparaat op hetzelfde netwerk?',
+          { status: 0, network: true, cause: err },
+        );
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+      const sid = res.headers.get('mcp-session-id');
+      if (sid) this.sessionId = sid;
+      return res;
+    }
+
+    async _read(res, id, method) {
+      const type = res.headers.get('content-type') || '';
+      const text = await res.text();
+      let messages;
+      if (type.includes('text/event-stream')) messages = parseSse(text);
+      else if (!text.trim()) messages = [];
+      else {
+        try {
+          const json = JSON.parse(text);
+          messages = Array.isArray(json) ? json : [json];
+        } catch (e) {
+          throw new McpError(`Onverwacht antwoord van de bridge op ${method}.`, { status: res.status });
+        }
+      }
+      const msg = messages.find((m) => m && String(m.id) === String(id));
+      if (!msg) throw new McpError(`Geen antwoord van de bridge op ${method}.`, { status: res.status });
+      if (msg.error) {
+        throw new McpError(msg.error.message || `De bridge gaf een fout op ${method}.`, { code: msg.error.code, data: msg.error.data, status: res.status });
+      }
+      return msg.result;
+    }
+
+    async request(method, params, retried) {
+      const id = ++this._id;
+      const res = await this._post({ jsonrpc: '2.0', id, method, params: params || {} }, method);
+      if (res.status === 404 && this.sessionId && method !== 'initialize' && !retried) {
+        // Sessie verlopen (bridge herstart): opnieuw verbinden en één keer herhalen.
+        this.sessionId = null;
+        await this.connect();
+        return this.request(method, params, true);
+      }
+      if (!res.ok) {
+        let body = '';
+        try { body = await res.text(); } catch (e) { /* leeg */ }
+        throw new McpError(httpMessage(res.status, body), { status: res.status });
+      }
+      return this._read(res, id, method);
+    }
+
+    async notify(method, params) {
+      try {
+        const res = await this._post({ jsonrpc: '2.0', method, params: params || {} }, method);
+        try { await res.text(); } catch (e) { /* leeg */ }
+      } catch (e) {
+        /* een notificatie mag mislukken */
+      }
+    }
+
+    async connect() {
+      this.sessionId = null;
+      this.protocolVersion = null;
+      const result = await this.request('initialize', {
+        protocolVersion: PROTOCOL,
+        capabilities: {},
+        clientInfo: { name: this.clientName, version: this.clientVersion },
+      });
+      this.protocolVersion = (result && result.protocolVersion) || PROTOCOL;
+      this.serverInfo = (result && result.serverInfo) || null;
+      this.instructions = (result && result.instructions) || null;
+      await this.notify('notifications/initialized');
+      return result;
+    }
+
+    async listTools() {
+      const all = [];
+      let cursor = null;
+      for (let page = 0; page < 20; page++) {
+        const result = await this.request('tools/list', cursor ? { cursor } : {});
+        all.push(...((result && result.tools) || []));
+        cursor = result && result.nextCursor;
+        if (!cursor) break;
+      }
+      this.tools = all;
+      return all;
+    }
+
+    async callTool(name, args) {
+      const result = await this.request('tools/call', { name, arguments: args || {} });
+      if (result && result.isError) {
+        const text = (result.content || []).filter((c) => c && c.type === 'text').map((c) => c.text).join('\n').trim();
+        throw new McpError(text || `De tool ${name} gaf een fout.`, { tool: name, toolError: true });
+      }
+      return result;
+    }
+  }
+
+  root.HDMcp = { McpClient, McpError, parseSse, httpMessage, PROTOCOL };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/*
+ * Homey Dashboard: voorbeeldwoning.
+ * Alleen voor de demo-modus: zelfde vorm als de Homey Web API, zodat de echte
+ * normalisatie meedraait. Bediening werkt op deze gegevens in het geheugen.
+ */
+(function (root) {
+  'use strict';
+
+  const ZONES = [
+    { id: 'z-huis', name: 'Huis', parent: null },
+    { id: 'z-woon', name: 'Woonkamer', parent: 'z-huis' },
+    { id: 'z-keuken', name: 'Keuken', parent: 'z-huis' },
+    { id: 'z-hal', name: 'Hal', parent: 'z-huis' },
+    { id: 'z-meterkast', name: 'Meterkast', parent: 'z-huis' },
+    { id: 'z-slaap', name: 'Slaapkamer', parent: 'z-huis' },
+    { id: 'z-kind', name: 'Kinderkamer', parent: 'z-huis' },
+    { id: 'z-bad', name: 'Badkamer', parent: 'z-huis' },
+    { id: 'z-kantoor', name: 'Kantoor', parent: 'z-huis' },
+    { id: 'z-zolder', name: 'Zolder', parent: 'z-huis' },
+    { id: 'z-tuin', name: 'Tuin', parent: 'z-huis' },
+    { id: 'z-garage', name: 'Garage', parent: 'z-huis' },
+  ];
+
+  // [naam, zone, klasse, capabilities, extra]
+  const DEVICES = [
+    ['Plafondlamp', 'z-woon', 'light', { onoff: true, dim: 0.72, light_temperature: 0.35 }],
+    ['Staande lamp', 'z-woon', 'light', { onoff: true, dim: 0.45 }],
+    ['Hue Play links', 'z-woon', 'light', { onoff: true, dim: 0.3, light_hue: 0.62, light_saturation: 0.8 }],
+    ['Hue Play rechts', 'z-woon', 'light', { onoff: true, dim: 0.3, light_hue: 0.62, light_saturation: 0.8 }],
+    ['Thermostaat woonkamer', 'z-woon', 'thermostat', { measure_temperature: 20.6, target_temperature: 21, thermostat_mode: 'heat', measure_humidity: 48 }],
+    ['Sonos Arc', 'z-woon', 'speaker', { onoff: true, speaker_playing: true, speaker_track: 'Avond', speaker_artist: 'Boudewijn de Groot', volume_set: 0.24, speaker_next: null, speaker_prev: null }],
+    ['Televisie', 'z-woon', 'tv', { onoff: false, volume_set: 0.18 }],
+    ['Screen voorgevel', 'z-woon', 'windowcoverings', { windowcoverings_set: 0.4, windowcoverings_state: 'idle' }],
+    ['Luchtkwaliteit', 'z-woon', 'sensor', { measure_co2: 640, measure_temperature: 20.9, measure_humidity: 47 }],
+    ['Bewegingssensor woonkamer', 'z-woon', 'sensor', { alarm_motion: true, measure_luminance: 214, measure_battery: 82 }],
+
+    ['Spots keuken', 'z-keuken', 'light', { onoff: true, dim: 0.85 }],
+    ['Lamp kookeiland', 'z-keuken', 'light', { onoff: false, dim: 0.6 }],
+    ['Vaatwasser', 'z-keuken', 'dishwasher', { onoff: true, measure_power: 1980 }],
+    ['Koffiemachine', 'z-keuken', 'socket', { onoff: false, measure_power: 0 }],
+    ['Koelkast', 'z-keuken', 'socket', { onoff: true, measure_power: 86 }],
+    ['Waterlekmelder', 'z-keuken', 'sensor', { alarm_water: false, measure_battery: 64 }],
+
+    ['Lamp hal', 'z-hal', 'light', { onoff: false, dim: 1 }],
+    ['Lamp overloop', 'z-hal', 'light', { onoff: false, dim: 0.5 }, { available: false, unavailableMessage: 'Zigbee-apparaat reageert niet' }],
+    ['Voordeur slot', 'z-hal', 'lock', { locked: true, measure_battery: 54 }],
+    ['Voordeur', 'z-hal', 'sensor', { alarm_contact: false, measure_battery: 91 }],
+    ['Deurbel', 'z-hal', 'doorbell', { alarm_generic: false, measure_battery: 77 }],
+    ['Bewegingssensor hal', 'z-hal', 'sensor', { alarm_motion: false, measure_temperature: 19.4, measure_battery: 68 }],
+    ['Alarmsysteem', 'z-hal', 'homealarm', { homealarm_state: 'disarmed' }],
+
+    ['Slimme meter', 'z-meterkast', 'sensor', { measure_power: 2140, meter_power: 18234.6, meter_gas: 3421.5 }, { energyObj: { cumulative: true } }],
+    ['Watermeter', 'z-meterkast', 'sensor', { meter_water: 512.3, measure_water: 0 }],
+
+    ['Bedlampje links', 'z-slaap', 'light', { onoff: false, dim: 0.4 }],
+    ['Plafondlamp slaapkamer', 'z-slaap', 'light', { onoff: false, dim: 0.8 }],
+    ['Thermostaat slaapkamer', 'z-slaap', 'thermostat', { measure_temperature: 18.2, target_temperature: 17.5, thermostat_mode: 'auto' }],
+    ['Rolluik slaapkamer', 'z-slaap', 'windowcoverings', { windowcoverings_set: 1, windowcoverings_state: 'idle' }],
+
+    ['Nachtlampje', 'z-kind', 'light', { onoff: true, dim: 0.1 }],
+    ['Thermostaat kinderkamer', 'z-kind', 'thermostat', { measure_temperature: 19.4, target_temperature: 19 }],
+    ['Rookmelder kinderkamer', 'z-kind', 'smokealarm', { alarm_smoke: false, measure_battery: 91 }],
+
+    ['Spiegelverlichting', 'z-bad', 'light', { onoff: false }],
+    ['Vloerverwarming', 'z-bad', 'thermostat', { measure_temperature: 22.1, target_temperature: 22 }],
+    ['Ventilator badkamer', 'z-bad', 'fan', { onoff: false, measure_humidity: 68 }],
+
+    ['Bureaulamp', 'z-kantoor', 'light', { onoff: true, dim: 1, light_temperature: 0.1 }],
+    ['Monitor', 'z-kantoor', 'socket', { onoff: true, measure_power: 46 }],
+    ['Klimaatsensor kantoor', 'z-kantoor', 'sensor', { measure_temperature: 21.3, measure_humidity: 44, measure_battery: 12 }],
+
+    ['Rookmelder zolder', 'z-zolder', 'smokealarm', { alarm_smoke: false, measure_battery: 9 }],
+    ['Wasmachine', 'z-zolder', 'washer', { onoff: false, measure_power: 0 }],
+    ['Droger', 'z-zolder', 'dryer', { onoff: false, measure_power: 0 }],
+    ['Omvormer zonnepanelen', 'z-zolder', 'solarpanel', { measure_power: 2380, meter_power: 9412.8 }],
+    ['Thuisbatterij', 'z-zolder', 'battery', { measure_battery: 76, measure_power: 820 }],
+
+    ['Tuinverlichting', 'z-tuin', 'light', { onoff: false, dim: 0.7 }],
+    ['Buitensensor', 'z-tuin', 'sensor', { measure_temperature: 13.8, measure_humidity: 81 }],
+    ['Achterdeur', 'z-tuin', 'sensor', { alarm_contact: true, measure_battery: 88 }],
+    ['Robotmaaier', 'z-tuin', 'lawnmower', { onoff: false, measure_battery: 100 }],
+
+    ['Laadpaal', 'z-garage', 'evcharger', { onoff: true, measure_power: 3680, meter_power: 1532.4 }],
+    ['Garagedeur', 'z-garage', 'garagedoor', { garagedoor_closed: true }],
+    ['Robotstofzuiger', 'z-huis', 'vacuumcleaner', { onoff: false, vacuumcleaner_state: 'docked', measure_battery: 100 }],
+    ['Gastenmodus', 'z-huis', 'other', { onoff: false }],
+  ];
+
+  const MOODS = [
+    { id: 'mood-avond', name: 'Avondsfeer' },
+    { id: 'mood-film', name: 'Film kijken' },
+    { id: 'mood-ochtend', name: 'Goedemorgen' },
+    { id: 'mood-uit', name: 'Alles uit' },
+  ];
+
+  const SETABLE = new Set([
+    'onoff', 'dim', 'light_temperature', 'light_hue', 'light_saturation', 'target_temperature', 'thermostat_mode',
+    'windowcoverings_set', 'windowcoverings_state', 'volume_set', 'speaker_playing', 'speaker_next', 'speaker_prev',
+    'locked', 'homealarm_state', 'garagedoor_closed', 'vacuumcleaner_state',
+  ]);
+
+  const UNITS = {
+    measure_temperature: '°C', target_temperature: '°C', measure_humidity: '%', measure_power: 'W', meter_power: 'kWh',
+    meter_gas: 'm³', meter_water: 'm³', measure_water: 'L/min', measure_co2: 'ppm', measure_luminance: 'lx', measure_battery: '%',
+  };
+
+  function slug(s) {
+    return s.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  function create() {
+    const now = Date.now();
+    const devices = DEVICES.map(([name, zone, cls, caps, extra], i) => {
+      const capabilitiesObj = {};
+      for (const [id, value] of Object.entries(caps)) {
+        capabilitiesObj[id] = {
+          id,
+          value,
+          units: UNITS[id] || undefined,
+          setable: SETABLE.has(id),
+          getable: !/^speaker_(next|prev)$/.test(id),
+          min: id === 'target_temperature' ? 5 : undefined,
+          max: id === 'target_temperature' ? 30 : undefined,
+          step: id === 'target_temperature' ? 0.5 : undefined,
+          lastUpdated: new Date(now - (i * 97 + 30) * 1000).toISOString(),
+        };
+      }
+      return {
+        id: `demo-${slug(name)}`,
+        name,
+        zone,
+        class: cls,
+        available: true,
+        capabilities: Object.keys(caps),
+        capabilitiesObj,
+        ...(extra || {}),
+      };
+    });
+    return { zones: ZONES.map((z) => ({ ...z })), devices, moods: MOODS.map((m) => ({ ...m })), ticks: 0 };
+  }
+
+  function find(house, id) {
+    return house.devices.find((d) => d.id === id);
+  }
+
+  function setValue(house, deviceId, capId, value) {
+    const d = find(house, deviceId);
+    if (!d) throw new Error('Onbekend apparaat');
+    if (d.available === false) throw new Error(`${d.name} is niet bereikbaar`);
+    const caps = d.capabilitiesObj;
+    if (capId === 'speaker_next' || capId === 'speaker_prev') {
+      const tracks = [['Avond', 'Boudewijn de Groot'], ['Zoutelande', 'BLØF'], ['Het is een nacht', 'Guus Meeuwis'], ['Malle Babbe', 'Normaal']];
+      const cur = tracks.findIndex((t) => t[0] === caps.speaker_track.value);
+      const next = tracks[(cur + (capId === 'speaker_next' ? 1 : tracks.length - 1)) % tracks.length];
+      caps.speaker_track.value = next[0];
+      caps.speaker_artist.value = next[1];
+      caps.speaker_playing.value = true;
+      return;
+    }
+    if (!caps[capId]) throw new Error(`${d.name} heeft geen ${capId}`);
+    caps[capId].value = value;
+    caps[capId].lastUpdated = new Date().toISOString();
+    if (capId === 'dim' && caps.onoff) caps.onoff.value = value > 0;
+    if (capId === 'windowcoverings_state' && caps.windowcoverings_set && value !== 'idle') {
+      caps.windowcoverings_set.value = value === 'up' ? 1 : 0;
+      setTimeout(() => { caps.windowcoverings_state.value = 'idle'; }, 2500);
+    }
+    if (capId === 'onoff' && caps.measure_power && d.class !== 'socket') caps.measure_power.value = value ? 1200 : 0;
+  }
+
+  function activateMood(house, moodId) {
+    const lights = house.devices.filter((d) => d.class === 'light' && d.available !== false);
+    const set = (name, on, dim) => {
+      const d = lights.find((l) => l.name === name);
+      if (!d) return;
+      d.capabilitiesObj.onoff.value = on;
+      if (dim != null && d.capabilitiesObj.dim) d.capabilitiesObj.dim.value = dim;
+    };
+    if (moodId === 'mood-uit') lights.forEach((d) => { d.capabilitiesObj.onoff.value = false; });
+    if (moodId === 'mood-avond') { set('Plafondlamp', true, 0.35); set('Staande lamp', true, 0.5); set('Hue Play links', true, 0.4); set('Hue Play rechts', true, 0.4); set('Spots keuken', true, 0.3); }
+    if (moodId === 'mood-film') { lights.forEach((d) => { if (/woonkamer|Plafondlamp$|Staande/.test(d.name)) d.capabilitiesObj.onoff.value = false; }); set('Hue Play links', true, 0.2); set('Hue Play rechts', true, 0.2); }
+    if (moodId === 'mood-ochtend') { set('Spots keuken', true, 1); set('Lamp hal', true, 1); set('Plafondlamp', true, 0.8); }
+  }
+
+  // Kleine schommelingen, zodat de demo leeft zoals een echt huis.
+  function tick(house) {
+    house.ticks += 1;
+    const jitter = (v, pct) => v * (1 + (Math.random() * 2 - 1) * pct);
+    for (const d of house.devices) {
+      const c = d.capabilitiesObj;
+      if (c.measure_temperature && c.target_temperature) {
+        const diff = c.target_temperature.value - c.measure_temperature.value;
+        c.measure_temperature.value = Math.round((c.measure_temperature.value + diff * 0.08 + (Math.random() - 0.5) * 0.06) * 10) / 10;
+      }
+      if (d.name === 'Omvormer zonnepanelen') c.measure_power.value = Math.max(0, Math.round(jitter(c.measure_power.value, 0.04)));
+      if (d.name === 'Laadpaal' && c.onoff.value) c.measure_power.value = Math.round(jitter(3680, 0.01));
+      if (d.name === 'Vaatwasser' && c.onoff.value) c.measure_power.value = Math.round(jitter(1980, 0.06));
+    }
+    const meter = house.devices.find((d) => d.name === 'Slimme meter');
+    const solar = house.devices.find((d) => d.name === 'Omvormer zonnepanelen');
+    const battery = house.devices.find((d) => d.name === 'Thuisbatterij');
+    const usage = house.devices
+      .filter((d) => d.capabilitiesObj.measure_power && !['sensor', 'solarpanel', 'battery'].includes(d.class))
+      .reduce((s, d) => s + (d.capabilitiesObj.onoff && d.capabilitiesObj.onoff.value === false ? 0 : d.capabilitiesObj.measure_power.value), 0);
+    const lightsOn = house.devices.filter((d) => d.class === 'light' && d.capabilitiesObj.onoff && d.capabilitiesObj.onoff.value).length;
+    const base = 310 + lightsOn * 9;
+    meter.capabilitiesObj.measure_power.value = Math.round(jitter(base + usage + battery.capabilitiesObj.measure_power.value - solar.capabilitiesObj.measure_power.value, 0.02));
+    meter.capabilitiesObj.meter_power.value = Math.round((meter.capabilitiesObj.meter_power.value + 0.004) * 1000) / 1000;
+  }
+
+  root.HDDemo = { create, setValue, activateMood, tick };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+<script>
+/*
+ * Homey Dashboard: de interface.
+ * Haalt apparaten op via MCP AI Bridge (of de voorbeeldwoning), deelt ze in per
+ * categorie of ruimte en stuurt bediening terug naar de bridge.
+ */
+(function () {
+  'use strict';
+
+  const C = globalThis.HDCore;
+  const M = globalThis.HDMcp;
+  const Demo = globalThis.HDDemo;
+
+  const $ = (sel, el) => (el || document).querySelector(sel);
+  const $$ = (sel, el) => Array.from((el || document).querySelectorAll(sel));
+  const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ESC[ch]);
+  const cssEsc = (s) => (globalThis.CSS && CSS.escape ? CSS.escape(s) : String(s).replace(/["\\]/g, '\\$&'));
+  const icon = (name, extra) => `<svg class="i${extra ? ' ' + extra : ''}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const store = {
+    get(key, fallback) {
+      try {
+        const raw = localStorage.getItem('homey-dashboard:' + key);
+        return raw == null ? fallback : JSON.parse(raw);
+      } catch (e) { return fallback; }
+    },
+    set(key, value) {
+      try { localStorage.setItem('homey-dashboard:' + key, JSON.stringify(value)); } catch (e) { /* opslag niet beschikbaar */ }
+    },
+  };
+
+  // ------------------------------------------------------------------ configuratie
+
+  const BRIDGE_PORT = '52199';
+
+  function readEmbeddedConfig() {
+    try {
+      const el = document.getElementById('hd-config');
+      const parsed = el ? JSON.parse(el.textContent || '{}') : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) { return {}; }
+  }
+
+  function autoEndpoint(embedded) {
+    if (embedded.endpoint) {
+      try { return new URL(embedded.endpoint, location.href).href; } catch (e) { return ''; }
+    }
+    if (/^https?:$/.test(location.protocol) && (location.port === BRIDGE_PORT || /^\/dashboard(\/|$)/.test(location.pathname))) {
+      return location.origin + '/mcp';
+    }
+    return '';
+  }
+
+  function loadConfig() {
+    const embedded = readEmbeddedConfig();
+    const saved = store.get('config', {});
+    const cfg = {
+      homeName: 'Thuis',
+      endpoint: '',
+      apiKey: '',
+      interval: 10,
+      demo: false,
+      ...pick(embedded, ['homeName', 'apiKey', 'interval', 'demo']),
+      ...saved,
+    };
+    cfg.auto = autoEndpoint(embedded);
+    cfg.proxied = !!embedded.proxied;
+    return cfg;
+  }
+
+  function pick(obj, keys) {
+    const out = {};
+    for (const k of keys) if (obj[k] !== undefined && obj[k] !== '') out[k] = obj[k];
+    return out;
+  }
+
+  function endpointOf(cfg) {
+    return (cfg.endpoint || '').trim() || cfg.auto || '';
+  }
+
+  // ------------------------------------------------------------------ bronnen
+
+  class DemoSource {
+    constructor() {
+      this.kind = 'demo';
+      this.house = Demo.create();
+      this.zones = C.normalizeZones(this.house.zones);
+      this.label = 'Voorbeeldwoning';
+    }
+    async init() {}
+    async load() {
+      Demo.tick(this.house);
+      const raw = JSON.parse(JSON.stringify(this.house.devices));
+      return { devices: C.normalizeDevices(raw, this.zones), zones: this.zones, moods: this.house.moods.slice(), full: true };
+    }
+    // Verloop van het verbruik voor de grafiek, zodat de voorbeeldwoning meteen een lijn heeft.
+    history(points, stepMs) {
+      const copy = JSON.parse(JSON.stringify(this.house));
+      const now = Date.now();
+      const out = [];
+      for (let i = points; i > 0; i--) {
+        Demo.tick(copy);
+        const ov = C.overview(C.normalizeDevices(copy.devices, this.zones));
+        if (ov.power) out.push({ t: now - i * stepMs, w: ov.power.watts });
+      }
+      return out;
+    }
+
+    async setCapability(device, capId, value) {
+      await sleep(180);
+      Demo.setValue(this.house, device.id, capId, value);
+    }
+    async activateMood(mood) {
+      await sleep(220);
+      Demo.activateMood(this.house, mood.id);
+    }
+    describe() {
+      return 'voorbeeldgegevens';
+    }
+  }
+
+  class LiveSource {
+    constructor(endpoint, apiKey) {
+      this.kind = 'live';
+      this.endpoint = endpoint;
+      this.client = new M.McpClient({ url: endpoint, apiKey, clientName: 'homey-dashboard' });
+      this.map = null;
+      this.zones = C.normalizeZones(null);
+      this.moods = [];
+      this.lastFull = 0;
+    }
+
+    async init() {
+      await this.client.connect();
+      const tools = await this.client.listTools();
+      this.map = C.pickTools(tools);
+      if (!this.map.listDevices) {
+        throw new M.McpError(`De bridge biedt geen tool om apparaten op te halen (${tools.length} tools gezien). Geef deze API-sleutel toegang tot de apparaten-tools.`, { setup: true });
+      }
+      this.label = [this.client.serverInfo && this.client.serverInfo.name, this.client.serverInfo && this.client.serverInfo.version].filter(Boolean).join(' ') || 'MCP AI Bridge';
+    }
+
+    async load(prev) {
+      const full = !prev || !prev.length || Date.now() - this.lastFull > 5 * 60 * 1000;
+      if (full) {
+        await Promise.all([this.loadZones(), this.loadMoods()]);
+      }
+      let devices = await this.fetchDevices(full);
+      if (full) {
+        devices = await this.fillMissingValues(devices);
+        this.lastFull = Date.now();
+      }
+      return { devices: full ? devices : C.mergeDevices(prev, devices), zones: this.zones, moods: this.moods, full };
+    }
+
+    async loadZones() {
+      if (!this.map.listZones) return;
+      try {
+        const res = await this.client.callTool(this.map.listZones.name, C.listArgs(this.map.listZones));
+        this.zones = C.normalizeZones(C.extractPayload(res));
+      } catch (e) { /* ruimtes zijn een extraatje */ }
+    }
+
+    async loadMoods() {
+      if (!this.map.listMoods || !this.map.activateMood) return;
+      try {
+        const res = await this.client.callTool(this.map.listMoods.name, C.listArgs(this.map.listMoods));
+        this.moods = C.normalizeMoods(C.extractPayload(res));
+      } catch (e) { this.moods = []; }
+    }
+
+    async fetchDevices(detailed) {
+      const tool = this.map.listDevices;
+      let args = C.listArgs(tool, { detailed });
+      const all = [];
+      for (let page = 0; page < 50; page++) {
+        const res = await this.client.callTool(tool.name, args);
+        const payload = C.extractPayload(res);
+        const items = C.extractList(payload);
+        all.push(...items);
+        const next = C.nextPageArgs(tool, args, payload, items.length);
+        if (!next) break;
+        args = next;
+      }
+      if (!all.length) throw new M.McpError(`De tool ${tool.name} gaf geen apparaten terug.`);
+      return C.normalizeDevices(all, this.zones);
+    }
+
+    // Sommige lijsten geven alleen namen; dan per apparaat de waardes ophalen.
+    async fillMissingValues(devices) {
+      const hasValues = devices.some((d) => Object.values(d.caps).some((c) => c.value !== null));
+      if (hasValues || !this.map.getDevice) return devices;
+      const tool = this.map.getDevice;
+      const out = devices.slice();
+      let i = 0;
+      const worker = async () => {
+        while (i < out.length) {
+          const idx = i++;
+          try {
+            const res = await this.client.callTool(tool.name, C.deviceRefArgs(tool, out[idx]));
+            const payload = C.extractPayload(res);
+            const raw = payload && payload.device ? payload.device : payload;
+            const d = C.normalizeDevice({ id: out[idx].id, name: out[idx].name, zone: out[idx].zoneId, class: out[idx].cls, ...raw }, this.zones);
+            if (d) out[idx] = d;
+          } catch (e) { /* dit apparaat houdt zijn lege waardes */ }
+        }
+      };
+      await Promise.all(Array.from({ length: 6 }, worker));
+      return out;
+    }
+
+    async setCapability(device, capId, value) {
+      if (!this.map.setCapability) throw new M.McpError('Deze API-sleutel mag niets bedienen. Geef de sleutel permissie Control only of hoger.');
+      const tool = this.map.setCapability;
+      await this.client.callTool(tool.name, C.setCapabilityArgs(tool, device, capId, value));
+    }
+
+    async activateMood(mood) {
+      const tool = this.map.activateMood;
+      await this.client.callTool(tool.name, C.moodArgs(tool, mood));
+    }
+
+    describe() {
+      const m = this.map || {};
+      return [this.label, m.listDevices && m.listDevices.name, m.setCapability && m.setCapability.name].filter(Boolean).join(' · ');
+    }
+  }
+
+  // ------------------------------------------------------------------ toestand
+
+  const state = {
+    cfg: loadConfig(),
+    source: null,
+    status: 'connecting',
+    error: null,
+    devices: [],
+    zones: C.normalizeZones(null),
+    moods: [],
+    view: store.get('view', 'category'),
+    filter: store.get('filter', 'all'),
+    query: '',
+    lastUpdate: null,
+    powerHistory: [],
+    loading: true,
+    fallbackDemo: false,
+  };
+
+  const pending = new Map();
+  const busy = new Set();
+  let pollTimer = null;
+  let refreshing = false;
+  let detailsId = null;
+  let confirmUnlock = null;
+  let activeRange = null;
+  const tileCache = new Map();
+  let layoutSig = '';
+  const stepTimers = new Map();
+
+  // ------------------------------------------------------------------ data
+
+  // Een bediende waarde blijft staan zolang de opdracht onderweg is; een lijst die daarna is
+  // opgehaald is leidend, ook als iets anders (een flow, een sfeer) de waarde intussen veranderde.
+  function applyData(data, startedAt) {
+    const now = Date.now();
+    for (const [key, p] of pending) if (p.until < now) pending.delete(key);
+    for (const d of data.devices) {
+      for (const [capId, cap] of Object.entries(d.caps)) {
+        const key = d.id + '|' + capId;
+        const p = pending.get(key);
+        if (!p) continue;
+        if (cap.value === p.value || (p.settledAt && startedAt >= p.settledAt)) pending.delete(key);
+        else cap.value = p.value;
+      }
+    }
+    state.devices = data.devices;
+    state.zones = data.zones && data.zones.list.length ? data.zones : state.zones;
+    state.moods = data.moods || [];
+    state.lastUpdate = new Date();
+    const ov = C.overview(state.devices);
+    if (ov.power) {
+      state.powerHistory.push({ t: now, w: ov.power.watts });
+      if (state.powerHistory.length > 90) state.powerHistory.shift();
+    }
+  }
+
+  async function connect() {
+    clearTimeout(pollTimer);
+    const cfg = state.cfg;
+    const endpoint = endpointOf(cfg);
+    const hadLiveData = state.devices.length > 0 && !state.fallbackDemo && state.source && state.source.kind === 'live';
+    const retrying = state.fallbackDemo && state.status === 'error';
+    state.loading = true;
+    if (!retrying) state.error = null;
+    if (!hadLiveData) state.powerHistory = [];
+    if (cfg.demo || !endpoint) {
+      state.source = new DemoSource();
+      state.status = 'demo';
+      state.error = null;
+    } else {
+      state.source = new LiveSource(endpoint, cfg.apiKey);
+      // Bij opnieuw proberen blijft de foutmelding staan tot er een nieuwe uitkomst is.
+      state.status = retrying ? 'error' : 'connecting';
+    }
+    render();
+    try {
+      await state.source.init();
+      const startedAt = Date.now();
+      const data = await state.source.load(null);
+      state.fallbackDemo = false;
+      state.error = null;
+      if (state.source.kind === 'demo') state.powerHistory = state.source.history(36, (Number(cfg.interval) || 10) * 1000);
+      applyData(data, startedAt);
+      state.status = state.source.kind === 'demo' ? 'demo' : 'live';
+    } catch (err) {
+      state.status = 'error';
+      state.error = err;
+      if (!hadLiveData) {
+        // Toon de voorbeeldwoning zolang de echte verbinding niet lukt.
+        const demo = new DemoSource();
+        state.powerHistory = demo.history(36, 10000);
+        applyData(await demo.load(), Date.now());
+        state.fallbackDemo = true;
+      }
+    }
+    state.loading = false;
+    render();
+    schedule();
+  }
+
+  async function refresh(manual) {
+    if (refreshing || !state.source) return;
+    if (state.fallbackDemo) { if (manual) connect(); return; }
+    refreshing = true;
+    const btn = $('#btn-refresh');
+    if (manual && btn) btn.classList.add('is-spinning');
+    const startedAt = Date.now();
+    try {
+      const data = await state.source.load(state.devices);
+      applyData(data, startedAt);
+      state.status = state.source.kind === 'demo' ? 'demo' : 'live';
+      state.error = null;
+    } catch (err) {
+      state.status = 'error';
+      state.error = err;
+      if (err && err.status === 0 && state.source.kind === 'live') {
+        // Netwerk weg: bij terugkeer opnieuw verbinden in plaats van op een oude sessie te blijven hangen.
+        state.source.lastFull = 0;
+      }
+    } finally {
+      refreshing = false;
+      if (btn) btn.classList.remove('is-spinning');
+    }
+    render();
+  }
+
+  function schedule() {
+    clearTimeout(pollTimer);
+    const seconds = Math.max(3, Number(state.cfg.interval) || 10);
+    const delay = state.fallbackDemo ? 30000 : seconds * 1000;
+    pollTimer = setTimeout(async () => {
+      if (document.hidden) { schedule(); return; }
+      if (state.fallbackDemo) await connect();
+      else { await refresh(false); schedule(); }
+    }, delay);
+  }
+
+  function soonRefresh() {
+    clearTimeout(pollTimer);
+    pollTimer = setTimeout(async () => { await refresh(false); schedule(); }, 1200);
+  }
+
+  function deviceById(id) {
+    return state.devices.find((d) => d.id === id);
+  }
+
+  async function setCap(device, capId, value, options) {
+    const opts = options || {};
+    const cap = device.caps[capId];
+    const key = device.id + '|' + capId;
+    const before = cap ? cap.value : null;
+    if (cap && !opts.momentary) {
+      cap.value = value;
+      pending.set(key, { value, until: Date.now() + 6000 });
+    }
+    busy.add(device.id);
+    render();
+    try {
+      await state.source.setCapability(device, capId, value);
+      const p = pending.get(key);
+      if (p) p.settledAt = Date.now();
+      if (opts.success) toast(opts.success);
+      soonRefresh();
+    } catch (err) {
+      pending.delete(key);
+      if (cap && !opts.momentary) cap.value = before;
+      toast(`${device.name}: ${errorText(err)}`, 'crit');
+    } finally {
+      busy.delete(device.id);
+      render();
+    }
+  }
+
+  function errorText(err) {
+    if (!err) return 'Onbekende fout';
+    return err.message || String(err);
+  }
+
+  // ------------------------------------------------------------------ groeperen
+
+  function zoneOrder(name) {
+    const z = state.zones.list.findIndex((x) => x.name === name);
+    return z < 0 ? 999 : z;
+  }
+
+  function sortDevices(list, by) {
+    const catIndex = (id) => C.CATEGORIES.findIndex((c) => c.id === id);
+    return list.slice().sort((a, b) => {
+      if (by === 'zone') {
+        const z = zoneOrder(a.zoneName) - zoneOrder(b.zoneName) || String(a.zoneName || '~').localeCompare(String(b.zoneName || '~'), 'nl');
+        if (z) return z;
+      } else {
+        const c = catIndex(a.category) - catIndex(b.category);
+        if (c) return c;
+      }
+      return a.name.localeCompare(b.name, 'nl', { numeric: true });
+    });
+  }
+
+  function matchesQuery(d, q) {
+    if (!q) return true;
+    const cat = C.CATEGORY_BY_ID[d.category];
+    const hay = [d.name, d.zoneName, cat && cat.label, d.cls].join(' ').toLowerCase();
+    return q.split(/\s+/).every((part) => hay.includes(part));
+  }
+
+  function allGroups() {
+    const q = state.query.trim().toLowerCase();
+    const list = state.devices.filter((d) => matchesQuery(d, q));
+    const groups = [];
+    if (state.view === 'zone') {
+      const names = [];
+      for (const z of state.zones.list) if (!names.includes(z.name)) names.push(z.name);
+      for (const d of list) {
+        const n = d.zoneName || 'Zonder ruimte';
+        if (!names.includes(n)) names.push(n);
+      }
+      for (const name of names) {
+        const items = list.filter((d) => (d.zoneName || 'Zonder ruimte') === name);
+        if (items.length) groups.push({ id: 'zone:' + name, title: name, icon: 'home', items: sortDevices(items, 'category') });
+      }
+    } else {
+      for (const cat of C.CATEGORIES) {
+        const items = list.filter((d) => d.category === cat.id);
+        if (items.length) groups.push({ id: cat.id, title: cat.label, icon: cat.icon, items: sortDevices(items, 'zone') });
+      }
+    }
+    return groups;
+  }
+
+  function visibleGroups(groups) {
+    if (state.filter === 'all') return groups;
+    const g = groups.filter((x) => x.id === state.filter);
+    return g.length ? g : groups;
+  }
+
+  // ------------------------------------------------------------------ render
+
+  function render() {
+    renderMast();
+    renderBanner();
+    renderOverview();
+    renderAttention();
+    renderMoods();
+    const groups = allGroups();
+    if (state.filter !== 'all' && !groups.some((g) => g.id === state.filter) && !state.query) state.filter = 'all';
+    renderFilters(groups);
+    renderSections(visibleGroups(groups));
+    renderFooter();
+    if (detailsId) renderDetails(false);
+  }
+
+  function renderMast() {
+    const name = state.cfg.homeName || 'Thuis';
+    const h1 = $('#home-name');
+    if (h1.textContent !== name) h1.textContent = name;
+    document.title = name === 'Thuis' ? 'Homey Dashboard' : `${name} · Homey Dashboard`;
+
+    const st = $('#status');
+    const labels = { live: 'Live', demo: 'Voorbeeld', connecting: 'Verbinden', error: 'Geen verbinding' };
+    let text = labels[state.status] || state.status;
+    if (state.status === 'live' && state.lastUpdate) text += ' · ' + timeOf(state.lastUpdate, true);
+    st.dataset.state = state.status;
+    st.textContent = text;
+    st.title = state.error ? errorText(state.error) : '';
+
+    const ov = C.overview(state.devices);
+    const out = $('#outdoor');
+    out.textContent = ov.outdoor ? `Buiten ${C.fmtNumber(ov.outdoor.value, 1)} °C` : '';
+  }
+
+  function renderBanner() {
+    const el = $('#banner');
+    let html = '';
+    let tone = 'info';
+    const endpoint = endpointOf(state.cfg);
+    if (state.status === 'error' && state.fallbackDemo) {
+      tone = 'crit';
+      html = `${icon('alert')}<p><strong>Geen verbinding met je bridge.</strong> ${esc(errorText(state.error))} Je ziet nu de voorbeeldwoning; het dashboard probeert het elke 30 seconden opnieuw.</p><button type="button" class="btn" data-action="settings">Instellingen</button>`;
+    } else if (state.status === 'error') {
+      tone = 'crit';
+      html = `${icon('alert')}<p><strong>Verbinding even weg.</strong> ${esc(errorText(state.error))} Je ziet de stand van ${esc(state.lastUpdate ? timeOf(state.lastUpdate, true) : 'eerder')}.</p><button type="button" class="btn" data-action="refresh">Opnieuw proberen</button>`;
+    } else if (state.source && state.source.kind === 'demo') {
+      html = state.cfg.demo
+        ? `${icon('sparkle')}<p><strong>Voorbeeldmodus staat aan.</strong> Alles hieronder is een verzonnen woning. Zet de voorbeeldmodus uit in de instellingen om je eigen Homey te zien.</p><button type="button" class="btn" data-action="settings">Instellingen</button>`
+        : `${icon('sparkle')}<p><strong>Dit is een voorbeeldwoning.</strong> ${endpoint ? '' : 'Open dit dashboard via MCP AI Bridge op je Homey, of vul het adres en een API-sleutel van je bridge in om je eigen apparaten te zien.'}</p><button type="button" class="btn btn--primary" data-action="settings">Verbinden met mijn Homey</button>`;
+    }
+    el.hidden = !html;
+    el.dataset.tone = tone;
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  function sparkline(history) {
+    if (history.length < 2) return '';
+    const w = 200;
+    const h = 34;
+    const pad = 4;
+    const vals = history.map((p) => p.w);
+    let lo = Math.min(...vals);
+    let hi = Math.max(...vals);
+    if (hi - lo < 50) { const mid = (hi + lo) / 2; lo = mid - 25; hi = mid + 25; }
+    const x = (i) => pad + (i / (history.length - 1)) * (w - pad * 2);
+    const y = (v) => pad + (1 - (v - lo) / (hi - lo)) * (h - pad * 2);
+    const pts = history.map((p, i) => `${x(i).toFixed(1)},${y(p.w).toFixed(1)}`);
+    const last = history[history.length - 1];
+    const minutes = Math.max(1, Math.round((last.t - history[0].t) / 60000));
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Verbruik in de laatste ${minutes} minuten">
+      <line class="spark-base" x1="${pad}" x2="${w - pad}" y1="${h - 0.5}" y2="${h - 0.5}"/>
+      <path class="spark-area" d="M${pts[0]} L${pts.join(' L')} L${x(history.length - 1).toFixed(1)},${h} L${x(0).toFixed(1)},${h} Z"/>
+      <polyline class="spark-line" vector-effect="non-scaling-stroke" points="${pts.join(' ')}"/>
+    </svg>`;
+  }
+
+  function stat(label, iconName, value, unit, sub, tone, extra) {
+    return `<div class="stat"${tone ? ` data-tone="${tone}"` : ''}>
+      <span class="stat-label">${icon(iconName)}${esc(label)}</span>
+      <span class="stat-value">${esc(value)}${unit ? `<small>${esc(unit)}</small>` : ''}</span>
+      <span class="stat-sub">${esc(sub || '')}</span>${extra || ''}
+    </div>`;
+  }
+
+  function renderOverview() {
+    const el = $('#overview');
+    if (state.loading && !state.devices.length) {
+      el.innerHTML = stat('Verlichting', 'bulb', '—', '', 'Apparaten ophalen…') + stat('Binnen', 'thermo', '—', '', '') + stat('Verbruik nu', 'bolt', '—', '', '') + stat('Aandacht', 'alert', '—', '', '');
+      return;
+    }
+    const ov = C.overview(state.devices);
+    const parts = [];
+    parts.push(stat('Verlichting aan', 'bulb', String(ov.lights.on), `van ${ov.lights.total}`, ov.lights.on ? `${ov.lights.total - ov.lights.on} uit` : 'Alles is uit'));
+    if (ov.indoor) {
+      const range = ov.indoor.count > 1 ? `${C.fmtNumber(ov.indoor.min, 1)} tot ${C.fmtNumber(ov.indoor.max, 1)} °C over ${ov.indoor.count} meters` : '1 meter';
+      parts.push(stat('Binnen gemiddeld', 'thermo', C.fmtNumber(ov.indoor.avg, 1), '°C', range));
+    } else parts.push(stat('Binnen gemiddeld', 'thermo', '—', '', 'Geen temperatuurmeters'));
+    if (ov.power) {
+      const p = C.fmtPower(ov.power.watts);
+      const subBits = [];
+      if (ov.power.source === 'meter') subBits.push(ov.power.watts < 0 ? 'Teruglevering' : 'Slimme meter');
+      else subBits.push(`Som van ${ov.power.count} apparaten`);
+      if (ov.solar) { const s = C.fmtPower(ov.solar.watts); subBits.push(`zon ${s.text} ${s.unit}`); }
+      parts.push(stat('Verbruik nu', 'bolt', p.text, p.unit, subBits.join(' · '), '', sparkline(state.powerHistory)));
+    } else parts.push(stat('Verbruik nu', 'bolt', '—', '', 'Geen vermogensmeters'));
+    const tone = ov.critical ? 'crit' : ov.attentionCount ? 'warn' : 'good';
+    const first = ov.attention.find((a) => a.severity === 'crit' || a.severity === 'warn');
+    parts.push(stat('Aandacht', ov.critical ? 'alert' : 'shield', ov.attentionCount ? String(ov.attentionCount) : 'Alles rustig', '', first ? `${first.device.name}: ${first.text}` : `${ov.total} apparaten gecontroleerd`, tone));
+    const html = parts.join('');
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  function renderAttention() {
+    const el = $('#attention');
+    const items = state.loading ? [] : C.attentionItems(state.devices);
+    const visible = items.slice(0, 14);
+    const html = visible.length
+      ? `<span class="strip-label">Let op</span>` + visible.map((a) => `<button type="button" class="chip" data-sev="${a.severity}" data-action="details" data-id="${esc(a.device.id)}"><span class="dot"></span><span><b>${esc(a.device.name)}</b> ${esc(a.text)}</span></button>`).join('')
+        + (items.length > visible.length ? `<span class="strip-label">+${items.length - visible.length}</span>` : '')
+      : '';
+    el.hidden = !html;
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  function renderMoods() {
+    const el = $('#moods');
+    const html = state.moods.length
+      ? `<span class="strip-label">Sferen</span>` + state.moods.slice(0, 16).map((m) => `<button type="button" class="chip${busy.has('mood:' + m.id) ? ' is-busy' : ''}" data-action="mood" data-id="${esc(m.id)}">${icon('sparkle')}<span>${esc(m.name)}</span></button>`).join('')
+      : '';
+    el.hidden = !html;
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  function renderFilters(groups) {
+    const el = $('#filters');
+    const total = groups.reduce((s, g) => s + g.items.length, 0);
+    const chip = (id, label, iconName, count) =>
+      `<button type="button" class="filter" data-action="filter" data-value="${esc(id)}" aria-pressed="${state.filter === id}">${icon(iconName)}<span>${esc(label)}</span><span class="count">${count}</span></button>`;
+    const html = chip('all', 'Alles', 'grid', total) + groups.map((g) => chip(g.id, g.title, g.icon, g.items.length)).join('');
+    if (el.innerHTML !== html) {
+      el.innerHTML = html;
+      const active = el.querySelector('[aria-pressed="true"]');
+      if (active && active.offsetLeft + active.offsetWidth > el.scrollLeft + el.clientWidth) el.scrollLeft = active.offsetLeft - 16;
+    }
+    updateFilterEdges();
+    $('#view-category').setAttribute('aria-pressed', String(state.view === 'category'));
+    $('#view-zone').setAttribute('aria-pressed', String(state.view === 'zone'));
+  }
+
+  // Vervaagde randen laten zien dat er meer categorieën naast de zichtbare staan.
+  function updateFilterEdges() {
+    const el = $('#filters');
+    const max = el.scrollWidth - el.clientWidth;
+    el.classList.toggle('has-more-start', el.scrollLeft > 4);
+    el.classList.toggle('has-more-end', max - el.scrollLeft > 4);
+  }
+
+  function skeleton() {
+    const tile = `<div class="tile skeleton" aria-hidden="true"><div class="tile-top"><span class="tile-icon"></span></div><div class="skeleton-lines"><div class="bar bar--long"></div><div class="bar bar--short"></div></div></div>`;
+    return `<section class="bay"><div class="bay-head">${icon('home')}<h2>Apparaten ophalen</h2><span class="bay-meta">Verbinden met de bridge…</span></div><div class="grid">${tile.repeat(8)}</div></section>`;
+  }
+
+  function sectionHTML(g) {
+    return `<section class="bay" data-group="${esc(g.id)}" aria-labelledby="h-${esc(slugId(g.id))}">
+      <div class="bay-head">${icon(g.icon)}<h2 id="h-${esc(slugId(g.id))}">${esc(g.title)}</h2><span class="bay-meta">${esc(groupMeta(g))}</span></div>
+      <div class="grid">${g.items.map((d) => { const html = tileHTML(d); tileCache.set(d.id, html); return html; }).join('')}</div>
+    </section>`;
+  }
+
+  function slugId(s) {
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  }
+
+  function groupMeta(g) {
+    return C.groupMeta(g.items, state.view === 'category' ? g.id : null);
+  }
+
+  function renderSections(groups) {
+    const host = $('#sections');
+    if (state.loading && !state.devices.length) {
+      layoutSig = 'loading';
+      host.innerHTML = skeleton();
+      return;
+    }
+    const sig = state.view + '|' + groups.map((g) => g.id + ':' + g.items.map((d) => d.id).join(',')).join(';');
+    if (sig !== layoutSig) {
+      layoutSig = sig;
+      tileCache.clear();
+      if (!groups.length) {
+        host.innerHTML = state.query
+          ? `<div class="empty"><strong>Niets gevonden voor “${esc(state.query)}”</strong><span>Zoek op een apparaatnaam, ruimte of categorie.</span></div>`
+          : `<div class="empty"><strong>Geen apparaten</strong><span>De bridge gaf geen apparaten terug. Controleer welke tools deze API-sleutel mag gebruiken.</span></div>`;
+        return;
+      }
+      host.innerHTML = groups.map(sectionHTML).join('');
+      decorate(host);
+      return;
+    }
+    for (const g of groups) {
+      const section = host.querySelector(`[data-group="${cssEsc(g.id)}"]`);
+      if (!section) continue;
+      const meta = section.querySelector('.bay-meta');
+      const text = groupMeta(g);
+      if (meta && meta.textContent !== text) meta.textContent = text;
+      for (const d of g.items) {
+        const html = tileHTML(d);
+        if (tileCache.get(d.id) === html) continue;
+        const el = section.querySelector(`.tile[data-id="${cssEsc(d.id)}"]`);
+        if (!el || activeRange === d.id) continue;
+        const focusKey = focusSignature(el);
+        const tpl = document.createElement('template');
+        tpl.innerHTML = html.trim();
+        const fresh = tpl.content.firstElementChild;
+        el.replaceWith(fresh);
+        decorate(fresh);
+        tileCache.set(d.id, html);
+        if (focusKey) restoreFocus(fresh, focusKey);
+      }
+    }
+  }
+
+  function focusSignature(el) {
+    const a = document.activeElement;
+    if (!a || !el.contains(a)) return null;
+    return { action: a.getAttribute('data-action'), cap: a.getAttribute('data-cap'), value: a.getAttribute('data-value'), cls: a.className };
+  }
+
+  function restoreFocus(el, key) {
+    const candidates = $$('button, input, select', el);
+    const match = candidates.find((c) => c.getAttribute('data-action') === key.action && c.getAttribute('data-cap') === key.cap && c.getAttribute('data-value') === key.value)
+      || candidates.find((c) => c.className === key.cls);
+    if (match) match.focus({ preventScroll: true });
+  }
+
+  // Inline-stijlen via CSSOM, zodat een strenge Content-Security-Policy ze niet tegenhoudt.
+  function decorate(root) {
+    const tiles = root.matches && root.matches('.tile') ? [root] : $$('.tile[data-lvl]', root);
+    for (const t of tiles) if (t.dataset.lvl) t.style.setProperty('--lvl', t.dataset.lvl);
+    for (const r of $$('input.range', root)) paintRange(r);
+  }
+
+  function paintRange(r) {
+    const min = Number(r.min) || 0;
+    const max = Number(r.max) || 100;
+    const pct = max > min ? ((Number(r.value) - min) / (max - min)) * 100 : 0;
+    r.style.setProperty('--pct', pct.toFixed(1) + '%');
+  }
+
+  function renderFooter() {
+    const el = $('#footer');
+    const zones = new Set(state.devices.map((d) => d.zoneName).filter(Boolean));
+    const bits = [];
+    bits.push(`${state.devices.length} apparaten in ${zones.size} ruimtes`);
+    if (state.lastUpdate) bits.push(`bijgewerkt ${timeOf(state.lastUpdate, true)}`);
+    if (state.source && !state.fallbackDemo) bits.push(state.source.describe());
+    bits.push(`elke ${state.cfg.interval} s`);
+    const html = bits.map((b) => `<span>${esc(b)}</span>`).join('');
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }
+
+  // ------------------------------------------------------------------ tegels
+
+  function tileHTML(d) {
+    const s = C.deviceSummary(d);
+    const kind = C.tileKind(d);
+    const offline = !d.available;
+    const isBusy = busy.has(d.id);
+    const tcap = C.toggleCapability(d);
+    const classes = ['tile', 'tile--' + kind, 'tone-' + s.tone];
+    if (offline) classes.push('is-offline');
+    if (s.on) classes.push('is-on');
+    if (isBusy) classes.push('is-busy');
+    const lvl = s.level != null ? s.level : s.on ? 1 : 0;
+
+    const alarms = C.activeAlarms(d).filter((a) => a.severity);
+    let badge = '';
+    if (offline) badge = '';
+    else if (alarms.some((a) => a.severity === 'crit')) badge = '<span class="badge" data-sev="crit">Alarm</span>';
+    else {
+      const batt = C.capValue(d, 'measure_battery');
+      if (typeof batt === 'number' && batt <= 15) badge = `<span class="badge" data-sev="warn">${icon('battery')} ${C.fmtNumber(batt, 0)}%</span>`;
+    }
+
+    const where = state.view === 'zone' ? (C.CATEGORY_BY_ID[d.category] || {}).label : d.zoneName || 'Zonder ruimte';
+    let main;
+    if (tcap && !offline) {
+      const pressed = !!C.capValue(d, tcap);
+      const label = `${d.name}: ${pressed ? 'zet uit' : 'zet aan'}`;
+      main = `<button type="button" class="tile-main" data-action="toggle" data-cap="${tcap}" aria-pressed="${pressed}" aria-label="${esc(label)}" title="${esc(label)}">`;
+    } else {
+      main = `<button type="button" class="tile-main" data-action="details" aria-label="${esc(d.name)}: details">`;
+    }
+    const controls = offline ? '' : controlsHTML(d, kind);
+    const coverLevel = kind === 'cover' && s.level != null ? '<span class="tile-cover-level" aria-hidden="true"></span>' : '';
+
+    return `<article class="${classes.join(' ')}" data-id="${esc(d.id)}" data-lvl="${lvl.toFixed(3)}">${coverLevel}
+      <div class="tile-top"><span class="tile-icon" aria-hidden="true">${icon(C.deviceIcon(d))}</span>${badge}<button type="button" class="tile-more" data-action="details" aria-label="Alle gegevens van ${esc(d.name)}">${icon('more')}</button></div>
+      ${main}
+        <span class="tile-name">${esc(d.name)}</span>
+        <span class="tile-zone">${esc(where)}</span>
+        <span class="tile-state"><span class="val${isTextual(s.headline) ? ' val--text' : ''}">${esc(s.headline)}</span>${s.unit ? `<span class="unit">${esc(s.unit)}</span>` : ''}</span>
+        ${s.sub ? `<span class="tile-sub">${esc(s.sub)}</span>` : ''}
+      </button>
+      ${controls ? `<div class="tile-controls">${controls}</div>` : ''}
+    </article>`;
+  }
+
+  function isTextual(text) {
+    return String(text).length > 8 && !/^[-+]?[\d.,]+$/.test(text);
+  }
+
+  function setable(d, id) {
+    const c = d.caps[id];
+    return c && c.setable ? c : null;
+  }
+
+  function rangeHTML(d, cap, label) {
+    const r = C.sliderRange(cap);
+    const v = C.valueToSlider(cap);
+    const shown = cap.fraction ? `${Math.round(v)}%` : C.formatFull(cap);
+    return `<input class="range" type="range" min="${r.min}" max="${r.max}" step="${r.step}" value="${v}" data-cap="${cap.id}" aria-label="${esc(label + ' ' + d.name)}"><span class="range-val">${esc(shown)}</span>`;
+  }
+
+  function controlsHTML(d, kind) {
+    switch (kind) {
+      case 'light': {
+        const dim = setable(d, 'dim');
+        return dim ? rangeHTML(d, dim, 'Helderheid') : '';
+      }
+      case 'thermostat': {
+        const t = setable(d, 'target_temperature');
+        if (!t) return '';
+        const val = typeof t.value === 'number' ? C.fmtNumber(t.value, 1) + '°' : '—';
+        return `<div class="stepper">
+          <button type="button" class="ctl" data-action="step" data-cap="target_temperature" data-value="-1" aria-label="Doeltemperatuur ${esc(d.name)} lager">${icon('minus')}</button>
+          <span class="stepper-val"><small>Doel</small>${esc(val)}</span>
+          <button type="button" class="ctl" data-action="step" data-cap="target_temperature" data-value="1" aria-label="Doeltemperatuur ${esc(d.name)} hoger">${icon('plus')}</button>
+        </div>`;
+      }
+      case 'cover': {
+        const st = setable(d, 'windowcoverings_state');
+        const pos = setable(d, 'windowcoverings_set');
+        if (st) {
+          return ['up', 'idle', 'down'].map((v) => {
+            const label = { up: 'Omhoog', idle: 'Stop', down: 'Omlaag' }[v];
+            return `<button type="button" class="ctl" data-action="set" data-cap="windowcoverings_state" data-value="${v}" aria-label="${label} ${esc(d.name)}" title="${label}">${icon(v === 'idle' ? 'stop' : v)}</button>`;
+          }).join('');
+        }
+        return pos ? rangeHTML(d, pos, 'Positie') : '';
+      }
+      case 'media': {
+        const parts = [];
+        if (d.caps.speaker_prev) parts.push(`<button type="button" class="ctl" data-action="press" data-cap="speaker_prev" aria-label="Vorige op ${esc(d.name)}">${icon('prev')}</button>`);
+        const play = setable(d, 'speaker_playing');
+        if (play) {
+          const playing = play.value === true;
+          parts.push(`<button type="button" class="ctl" data-action="toggle" data-cap="speaker_playing" aria-pressed="${playing}" aria-label="${playing ? 'Pauzeer' : 'Speel'} ${esc(d.name)}">${icon(playing ? 'pause' : 'play')}</button>`);
+        }
+        if (d.caps.speaker_next) parts.push(`<button type="button" class="ctl" data-action="press" data-cap="speaker_next" aria-label="Volgende op ${esc(d.name)}">${icon('next')}</button>`);
+        const vol = setable(d, 'volume_set');
+        if (vol && !parts.length) return rangeHTML(d, vol, 'Volume');
+        if (vol) parts.push(`<input class="range" type="range" min="0" max="100" step="1" value="${C.valueToSlider(vol)}" data-cap="volume_set" aria-label="Volume ${esc(d.name)}">`);
+        return parts.join('');
+      }
+      case 'lock': {
+        const lock = setable(d, 'locked');
+        if (!lock) return '';
+        if (lock.value === true) {
+          const confirming = confirmUnlock && confirmUnlock.id === d.id && confirmUnlock.until > Date.now();
+          return confirming
+            ? `<button type="button" class="ctl ctl--wide ctl--confirm" data-action="unlock" data-cap="locked" data-value="confirm">${icon('unlock')}Tik nogmaals om te openen</button>`
+            : `<button type="button" class="ctl ctl--wide" data-action="unlock" data-cap="locked">${icon('unlock')}Ontgrendelen</button>`;
+        }
+        return `<button type="button" class="ctl ctl--wide" data-action="set" data-cap="locked" data-value="true">${icon('lock')}Vergrendelen</button>`;
+      }
+      case 'alarm': {
+        const al = setable(d, 'homealarm_state');
+        if (!al) return '';
+        const opts = [['disarmed', 'Uit'], ['partially_armed', 'Deels'], ['armed', 'Aan']];
+        return `<div class="segmented" role="group" aria-label="Alarmsysteem ${esc(d.name)}">${opts.map(([v, l]) => `<button type="button" data-action="set" data-cap="homealarm_state" data-value="${v}" aria-pressed="${al.value === v}">${l}</button>`).join('')}</div>`;
+      }
+      default:
+        return '';
+    }
+  }
+
+  // ------------------------------------------------------------------ details
+
+  function capControlHTML(d, cap) {
+    if (!cap.setable || !d.available) return '';
+    const meta = C.capMeta(cap.id) || {};
+    if (cap.kind === 'button') {
+      return `<button type="button" class="btn" data-action="press" data-cap="${esc(cap.id)}">${esc(meta.label || C.capLabel(cap))}</button>`;
+    }
+    if (cap.kind === 'bool') {
+      if (cap.id === 'locked' && cap.value === true) return `<button type="button" class="btn" data-action="unlock" data-cap="locked">${icon('unlock')}Ontgrendelen</button>`;
+      return `<button type="button" class="switch" role="switch" data-action="toggle" data-cap="${esc(cap.id)}" aria-checked="${cap.value === true}" aria-label="${esc(C.capLabel(cap))}"></button>`;
+    }
+    if (cap.kind === 'enum' && cap.values) {
+      const opts = Object.entries(cap.values).map(([v, l]) => `<option value="${esc(v)}"${String(cap.value) === v ? ' selected' : ''}>${esc(l)}</option>`).join('');
+      return `<select data-cap="${esc(cap.id)}" aria-label="${esc(C.capLabel(cap))}">${opts}</select>`;
+    }
+    if (cap.kind === 'number') {
+      if (cap.id === 'target_temperature') {
+        return `<div class="stepper"><button type="button" class="ctl" data-action="step" data-cap="target_temperature" data-value="-1" aria-label="Lager">${icon('minus')}</button><span class="stepper-val">${esc(C.formatFull(cap))}</span><button type="button" class="ctl" data-action="step" data-cap="target_temperature" data-value="1" aria-label="Hoger">${icon('plus')}</button></div>`;
+      }
+      if (cap.fraction || (cap.min != null && cap.max != null)) {
+        const r = C.sliderRange(cap);
+        return `<input class="range" type="range" min="${r.min}" max="${r.max}" step="${r.step}" value="${C.valueToSlider(cap)}" data-cap="${esc(cap.id)}" aria-label="${esc(C.capLabel(cap))}">`;
+      }
+    }
+    return '';
+  }
+
+  function relTime(t) {
+    if (!t) return '';
+    const s = Math.round((Date.now() - t) / 1000);
+    if (s < 45) return 'zojuist';
+    if (s < 3600) return `${Math.round(s / 60)} min geleden`;
+    if (s < 86400) return `${Math.round(s / 3600)} uur geleden`;
+    return new Date(t).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+  }
+
+  function renderDetails(open) {
+    const dlg = $('#details');
+    const d = deviceById(detailsId);
+    if (!d) { if (dlg.open) dlg.close(); detailsId = null; return; }
+    if (!open && dlg.contains(document.activeElement) && document.activeElement.matches('input, select')) return;
+    const s = C.deviceSummary(d);
+    const cat = C.CATEGORY_BY_ID[d.category] || C.CATEGORY_BY_ID.overig;
+    const rows = d.capOrder.map((id) => {
+      const cap = d.caps[id];
+      if (cap.kind === 'button' && !cap.setable) return '';
+      const meta = C.capMeta(id) || {};
+      const sev = cap.value === true && meta.alarm ? meta.alarm : '';
+      const value = cap.kind === 'button' ? '' : esc(C.formatFull(cap));
+      const control = capControlHTML(d, cap);
+      const when = cap.lastUpdated ? `<span class="cap-time">${esc(relTime(cap.lastUpdated))}</span>` : '';
+      return `<div class="cap-row"><div class="cap-label">${esc(C.capLabel(cap))}<span class="cap-id">${esc(id)}</span></div><div class="cap-value"${sev ? ` data-sev="${sev}"` : ''}>${value}</div>${control ? `<div class="cap-control">${control}</div>` : ''}${when}</div>`;
+    }).join('');
+    const offline = d.available ? '' : `<div class="banner" data-tone="crit">${icon('alert')}<p><strong>Niet bereikbaar.</strong> ${esc(d.unavailableMessage || 'Homey krijgt geen contact met dit apparaat.')}</p></div>`;
+    const html = `
+      <div class="sheet-head">
+        <span class="tile-icon" aria-hidden="true">${icon(C.deviceIcon(d))}</span>
+        <div class="sheet-title">
+          <h2 id="details-title">${esc(d.name)}</h2>
+          <p>${esc([d.zoneName || 'Zonder ruimte', cat.label, s.headline + (s.unit ? ' ' + s.unit : '')].join(' · '))}</p>
+        </div>
+        <button type="button" class="tile-more" data-action="close-dialog" aria-label="Sluiten">${icon('close')}</button>
+      </div>
+      <div class="sheet-body" data-id="${esc(d.id)}">
+        ${offline}
+        <div class="cap-list">${rows || '<p>Dit apparaat meldt geen gegevens.</p>'}</div>
+      </div>
+      <div class="sheet-foot">
+        <span>Homey-klasse <code>${esc(d.cls)}</code></span>
+        <span class="spacer"></span>
+        <code>${esc(d.id)}</code>
+        <button type="button" class="tile-more" data-action="copy" data-value="${esc(d.id)}" aria-label="Apparaat-id kopiëren">${icon('copy')}</button>
+      </div>`;
+    if (dlg.dataset.html !== html) {
+      const scroll = $('.sheet-body', dlg) ? $('.sheet-body', dlg).scrollTop : 0;
+      dlg.innerHTML = html;
+      dlg.dataset.html = html;
+      decorate(dlg);
+      const body = $('.sheet-body', dlg);
+      if (body && !open) body.scrollTop = scroll;
+    }
+    if (open && !dlg.open) {
+      try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
+    }
+  }
+
+  function openDetails(id) {
+    detailsId = id;
+    renderDetails(true);
+  }
+
+  // ------------------------------------------------------------------ acties
+
+  function deviceFrom(el) {
+    const host = el.closest('[data-id]');
+    if (!host) return null;
+    const own = el.getAttribute('data-id');
+    return deviceById(own || host.getAttribute('data-id'));
+  }
+
+  function onClick(ev) {
+    const el = ev.target.closest('[data-action]');
+    if (!el) {
+      const dlg = ev.target.closest('dialog');
+      if (dlg && ev.target === dlg) dlg.close();
+      return;
+    }
+    const action = el.getAttribute('data-action');
+    const cap = el.getAttribute('data-cap');
+    const value = el.getAttribute('data-value');
+
+    switch (action) {
+      case 'filter':
+        state.filter = value;
+        store.set('filter', value);
+        render();
+        scrollToSections();
+        return;
+      case 'view':
+        state.view = value;
+        state.filter = 'all';
+        store.set('view', value);
+        store.set('filter', 'all');
+        render();
+        return;
+      case 'refresh':
+        if (state.status === 'error' && state.source && state.source.kind === 'live' && !state.fallbackDemo) { connect(); return; }
+        refresh(true).then(schedule);
+        return;
+      case 'theme': cycleTheme(); return;
+      case 'fullscreen': toggleFullscreen(); return;
+      case 'settings': openSettings(); return;
+      case 'close-dialog': { const dlg = el.closest('dialog'); if (dlg) dlg.close(); return; }
+      case 'test-connection': testConnection(); return;
+      case 'copy': copyText(value); return;
+      case 'mood': {
+        const mood = state.moods.find((m) => m.id === el.getAttribute('data-id'));
+        if (!mood) return;
+        busy.add('mood:' + mood.id);
+        renderMoods();
+        state.source.activateMood(mood)
+          .then(() => { toast(`Sfeer “${mood.name}” staat aan`); soonRefresh(); })
+          .catch((err) => toast(`${mood.name}: ${errorText(err)}`, 'crit'))
+          .finally(() => { busy.delete('mood:' + mood.id); renderMoods(); });
+        return;
+      }
+      default:
+        break;
+    }
+
+    const d = deviceFrom(el);
+    if (!d) return;
+    if (action === 'details') { openDetails(d.id); return; }
+    if (!d.available) { toast(`${d.name} is niet bereikbaar`, 'crit'); return; }
+
+    if (action === 'toggle') {
+      const current = C.capValue(d, cap);
+      setCap(d, cap, !(current === true));
+    } else if (action === 'set') {
+      const v = value === 'true' ? true : value === 'false' ? false : value;
+      setCap(d, cap, v);
+    } else if (action === 'press') {
+      setCap(d, cap, true, { momentary: true });
+    } else if (action === 'unlock') {
+      if (value === 'confirm' || (el.closest('dialog') && confirmUnlock && confirmUnlock.id === d.id && confirmUnlock.until > Date.now())) {
+        confirmUnlock = null;
+        setCap(d, 'locked', false, { success: `${d.name} is ontgrendeld` });
+      } else {
+        confirmUnlock = { id: d.id, until: Date.now() + 5000 };
+        if (el.closest('dialog')) toast('Tik nogmaals op Ontgrendelen om te bevestigen');
+        render();
+        setTimeout(() => { if (confirmUnlock && confirmUnlock.until <= Date.now()) { confirmUnlock = null; render(); } }, 5100);
+      }
+    } else if (action === 'step') {
+      stepTarget(d, Number(value));
+    }
+  }
+
+  function stepTarget(d, direction) {
+    const cap = d.caps.target_temperature;
+    if (!cap) return;
+    const step = cap.step || 0.5;
+    const min = cap.min != null ? cap.min : 5;
+    const max = cap.max != null ? cap.max : 35;
+    const base = typeof cap.value === 'number' ? cap.value : 20;
+    const next = C.clamp(Math.round((base + direction * step) / step) * step, min, max);
+    cap.value = next;
+    pending.set(d.id + '|target_temperature', { value: next, until: Date.now() + 8000 });
+    render();
+    clearTimeout(stepTimers.get(d.id));
+    stepTimers.set(d.id, setTimeout(() => {
+      stepTimers.delete(d.id);
+      setCap(d, 'target_temperature', next);
+    }, 700));
+  }
+
+  function onInput(ev) {
+    const el = ev.target;
+    if (el.matches('#search')) {
+      state.query = el.value;
+      render();
+      return;
+    }
+    if (el.matches('input.range')) {
+      paintRange(el);
+      const d = deviceFrom(el);
+      if (d) activeRange = d.id;
+      const out = el.nextElementSibling;
+      if (out && out.classList.contains('range-val')) {
+        const cap = d && d.caps[el.getAttribute('data-cap')];
+        out.textContent = cap && !cap.fraction ? C.formatFull({ ...cap, value: Number(el.value) }) : `${el.value}%`;
+      }
+    }
+  }
+
+  function onChange(ev) {
+    const el = ev.target;
+    const capId = el.getAttribute('data-cap');
+    if (!capId || el.matches('#search')) return;
+    const d = deviceFrom(el);
+    activeRange = null;
+    if (!d || !d.caps[capId]) return;
+    if (el.matches('input.range')) setCap(d, capId, C.sliderToValue(d.caps[capId], el.value));
+    else if (el.matches('select')) {
+      const cap = d.caps[capId];
+      const raw = el.value;
+      setCap(d, capId, cap.kind === 'number' ? Number(raw) : raw);
+    }
+  }
+
+  function onPointerDown(ev) {
+    const r = ev.target.closest && ev.target.closest('input.range');
+    if (!r) return;
+    const d = deviceFrom(r);
+    if (d) activeRange = d.id;
+  }
+
+  function onPointerUp() {
+    setTimeout(() => { activeRange = null; }, 400);
+  }
+
+  function onKey(ev) {
+    if (ev.key === '/' && !ev.target.matches('input, select, textarea')) {
+      ev.preventDefault();
+      $('#search').focus();
+    }
+    if (ev.key === 'Escape' && ev.target.matches('#search') && ev.target.value) {
+      ev.target.value = '';
+      state.query = '';
+      render();
+    }
+  }
+
+  // ------------------------------------------------------------------ instellingen
+
+  function openSettings() {
+    const cfg = state.cfg;
+    $('#set-home').value = cfg.homeName || '';
+    $('#set-endpoint').value = cfg.endpoint || '';
+    $('#set-endpoint').placeholder = cfg.auto || 'http://192.168.1.50:52199/mcp';
+    $('#set-key').value = cfg.apiKey || '';
+    $('#set-interval').value = String(cfg.interval || 10);
+    $('#set-demo').checked = !!cfg.demo;
+    const hint = $('#set-endpoint-hint');
+    hint.textContent = cfg.auto
+      ? `Leeg laten gebruikt automatisch ${cfg.auto}.`
+      : 'Het MCP-adres van MCP AI Bridge, te vinden op de Status-tab in de app-instellingen. Het eindigt op /mcp.';
+    const result = $('#test-result');
+    result.hidden = true;
+    const dlg = $('#settings');
+    try { dlg.showModal(); } catch (e) { dlg.setAttribute('open', ''); }
+  }
+
+  function formConfig() {
+    return {
+      homeName: $('#set-home').value.trim() || 'Thuis',
+      endpoint: $('#set-endpoint').value.trim(),
+      apiKey: $('#set-key').value.trim(),
+      interval: Number($('#set-interval').value) || 10,
+      demo: $('#set-demo').checked,
+    };
+  }
+
+  async function testConnection() {
+    const out = $('#test-result');
+    const f = formConfig();
+    const endpoint = f.endpoint || state.cfg.auto;
+    out.hidden = false;
+    out.dataset.tone = '';
+    if (!endpoint) { out.dataset.tone = 'crit'; out.textContent = 'Vul eerst het adres van de bridge in.'; return; }
+    out.textContent = `Verbinden met ${endpoint}…`;
+    const src = new LiveSource(endpoint, f.apiKey);
+    try {
+      await src.init();
+      const data = await src.load(null);
+      const counts = {};
+      for (const d of data.devices) counts[d.category] = (counts[d.category] || 0) + 1;
+      const lines = [
+        `Verbonden met ${src.label}`,
+        `${src.client.tools.length} tools beschikbaar voor deze sleutel`,
+        `Apparaten ophalen: ${src.map.listDevices.name}`,
+        `Bedienen: ${src.map.setCapability ? src.map.setCapability.name : 'niet toegestaan met deze sleutel'}`,
+        `Ruimtes: ${src.map.listZones ? src.map.listZones.name : 'niet beschikbaar'}`,
+        `${data.devices.length} apparaten: ` + C.CATEGORIES.filter((c) => counts[c.id]).map((c) => `${c.label.toLowerCase()} ${counts[c.id]}`).join(', '),
+      ];
+      out.dataset.tone = 'good';
+      out.textContent = lines.join('\n');
+    } catch (err) {
+      out.dataset.tone = 'crit';
+      out.textContent = errorText(err) + (err && err.status === 0 && location.origin !== safeOrigin(endpoint)
+        ? '\n\nDraait dit dashboard op een ander adres dan de bridge? Dan blokkeert de browser de verbinding vaak. Open het dashboard via de bridge zelf, of start scripts/serve.mjs.'
+        : '');
+    }
+  }
+
+  function safeOrigin(url) {
+    try { return new URL(url).origin; } catch (e) { return ''; }
+  }
+
+  function saveSettings(ev) {
+    ev.preventDefault();
+    const f = formConfig();
+    const changedConnection = f.endpoint !== state.cfg.endpoint || f.apiKey !== state.cfg.apiKey || f.demo !== state.cfg.demo;
+    state.cfg = { ...state.cfg, ...f };
+    store.set('config', f);
+    $('#settings').close();
+    if (changedConnection) { state.devices = []; connect(); }
+    else { render(); schedule(); }
+    toast('Instellingen opgeslagen');
+  }
+
+  // ------------------------------------------------------------------ thema, scherm, klok
+
+  const hostTheme = document.documentElement.getAttribute('data-theme');
+
+  function applyTheme(mode) {
+    const root = document.documentElement;
+    if (mode === 'light' || mode === 'dark') root.setAttribute('data-theme', mode);
+    else if (hostTheme) root.setAttribute('data-theme', hostTheme);
+    else root.removeAttribute('data-theme');
+    const label = { light: 'Thema: licht', dark: 'Thema: donker' }[mode] || 'Thema: volgt systeem';
+    const btn = $('#btn-theme');
+    btn.title = label;
+    btn.setAttribute('aria-label', label);
+  }
+
+  function cycleTheme() {
+    const order = ['system', 'light', 'dark'];
+    const cur = store.get('theme', 'system');
+    const next = order[(order.indexOf(cur) + 1) % order.length];
+    store.set('theme', next);
+    applyTheme(next);
+    toast({ system: 'Thema volgt het systeem', light: 'Licht thema', dark: 'Donker thema' }[next]);
+  }
+
+  let wakeLock = null;
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await document.documentElement.requestFullscreen();
+        try { if (navigator.wakeLock) wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { wakeLock = null; }
+      }
+    } catch (e) {
+      toast('Schermvullend wordt hier niet ondersteund', 'crit');
+    }
+  }
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+  });
+
+  function timeOf(date, seconds) {
+    return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: seconds ? '2-digit' : undefined });
+  }
+
+  function tickClock() {
+    const now = new Date();
+    $('#clock').textContent = timeOf(now, false);
+    $('#date').textContent = now.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  let toastTimer = null;
+  function toast(text, tone) {
+    const el = $('#toast');
+    $('#toast-text').textContent = text;
+    el.dataset.tone = tone || '';
+    el.classList.add('is-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('is-visible'), tone === 'crit' ? 5200 : 2800);
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Gekopieerd');
+    } catch (e) {
+      const code = $('#details .sheet-foot code:last-of-type');
+      if (code) {
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const sel = getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      toast('Selecteer en kopieer het id handmatig');
+    }
+  }
+
+  // Na het kiezen van een filter: terug naar het begin van de vakken, onder de vaste balk.
+  function scrollToSections() {
+    const toolbar = $('#toolbar');
+    const top = $('#sections').getBoundingClientRect().top + scrollY - toolbar.offsetHeight - 12;
+    if (scrollY > top) scrollTo({ top, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+  }
+
+  function prefersReducedMotion() {
+    return globalThis.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // ------------------------------------------------------------------ start
+
+  function bind() {
+    document.addEventListener('click', onClick);
+    document.addEventListener('input', onInput);
+    document.addEventListener('change', onChange);
+    document.addEventListener('pointerdown', onPointerDown, { passive: true });
+    document.addEventListener('pointerup', onPointerUp, { passive: true });
+    document.addEventListener('keydown', onKey);
+    $('#settings-form').addEventListener('submit', saveSettings);
+    const filters = $('#filters');
+    filters.addEventListener('scroll', updateFilterEdges, { passive: true });
+    filters.addEventListener('wheel', (ev) => {
+      if (Math.abs(ev.deltaY) <= Math.abs(ev.deltaX) || filters.scrollWidth <= filters.clientWidth) return;
+      ev.preventDefault();
+      filters.scrollLeft += ev.deltaY;
+    }, { passive: false });
+    addEventListener('resize', updateFilterEdges, { passive: true });
+    $('#details').addEventListener('close', () => { detailsId = null; $('#details').dataset.html = ''; });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && state.source && !state.loading) refresh(false).then(schedule);
+    });
+    if (!document.fullscreenEnabled) $('#btn-fullscreen').hidden = true;
+    const toolbar = $('#toolbar');
+    if ('IntersectionObserver' in globalThis) {
+      new IntersectionObserver(([e]) => toolbar.classList.toggle('is-stuck', e.intersectionRatio < 1), { threshold: [1], rootMargin: '-1px 0px 0px 0px' }).observe(toolbar);
+    }
+  }
+
+  function start() {
+    bind();
+    applyTheme(store.get('theme', 'system'));
+    tickClock();
+    setInterval(tickClock, 15000);
+    $('#search').value = '';
+    render();
+    connect();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#e7ecea" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c1210" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Homey Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<!-- @inline-css styles.css -->
+</head>
+<body>
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-thermo" viewBox="0 0 24 24"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v7"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5"/><path d="M6 8h12v3a6 6 0 0 1-12 0z"/><path d="M12 17v4"/></symbol>
+  <symbol id="i-blinds" viewBox="0 0 24 24"><path d="M3 4h18"/><path d="M5 4v10h14V4"/><path d="M5 7.5h14M5 11h14"/><path d="M12 14v4"/><circle cx="12" cy="19.5" r="1.5"/></symbol>
+  <symbol id="i-speaker" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><circle cx="12" cy="14" r="3"/><circle cx="12" cy="7.5" r="1"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-sensor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="i-appliance" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6.5h.01M11 6.5h.01"/></symbol>
+  <symbol id="i-washer" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6.5h.01M11 6.5h.01"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21c-3.3 0-6-2.5-6-6 0-4 3.5-6 4-10 2 1.5 3.5 4 3.5 6 1-1 1.5-2 1.5-3 2 1.8 3 4.3 3 7 0 3.5-2.7 6-6 6z"/></symbol>
+  <symbol id="i-fan" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><path d="M12 10.5C12 7 13 4 15.5 4S18 7.5 12 10.5zM13.3 12.8c3 1.7 5 4.2 3.8 6.3s-4.4.2-3.8-6.3zM10.7 12.8c-3 1.7-6 2.2-7.2.1s1.4-4.1 7.2-.1z"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21h4"/></symbol>
+  <symbol id="i-smoke" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.5M12 18v2.5"/></symbol>
+  <symbol id="i-garage" viewBox="0 0 24 24"><path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8M7 16h10M7 18.5h10"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-battery" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/><path d="M6.5 10v4M9.5 10v4M12.5 10v4"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24"><path d="M3 15.5V13l2.2-5h13.6L21 13v2.5"/><path d="M3 13h18"/><path d="M3 15.5h18v2.5h-2M5 18H3v-2.5"/><circle cx="7.5" cy="18" r="1.8"/><circle cx="16.5" cy="18" r="1.8"/></symbol>
+  <symbol id="i-vacuum" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="9" r="2"/><path d="M7 15h10"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l7-7"/></symbol>
+  <symbol id="i-door" viewBox="0 0 24 24"><path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"/><path d="M4 21h16"/><path d="M14.5 12h.01"/></symbol>
+  <symbol id="i-motion" viewBox="0 0 24 24"><circle cx="13.5" cy="4.5" r="1.5"/><path d="M9 21l2.5-6 3 3v3M7 11.5l3-3.5h4l2 3 3 1M11.5 15l1.5-7"/></symbol>
+  <symbol id="i-button" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.4" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 1 1-2.6-6.4"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5.5v13M15.5 5.5v13" stroke-width="3"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M6 6v12l8.5-6z" fill="currentColor"/><path d="M18 6v12"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M18 6v12l-8.5-6z" fill="currentColor"/><path d="M6 6v12"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18.5 16.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-plug-off" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M9 3v4M15 3v5M18 8v3a6 6 0 0 1-1.2 3.6M14.7 16.4A6 6 0 0 1 6 11V8h2"/><path d="M12 17v4"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <header class="masthead">
+    <div class="mast-time">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date">&nbsp;</div>
+    </div>
+    <div class="mast-home">
+      <h1 id="home-name">Thuis</h1>
+      <div class="mast-meta">
+        <span class="status" id="status" data-state="connecting">Verbinden</span>
+        <span id="outdoor"></span>
+      </div>
+    </div>
+    <div class="mast-actions">
+      <button type="button" class="icon-btn" id="btn-refresh" data-action="refresh" aria-label="Nu verversen" title="Nu verversen"><svg class="i"><use href="#i-refresh"/></svg></button>
+      <button type="button" class="icon-btn" id="btn-theme" data-action="theme" aria-label="Thema wisselen" title="Thema"><svg class="i"><use href="#i-contrast"/></svg></button>
+      <button type="button" class="icon-btn" id="btn-fullscreen" data-action="fullscreen" aria-label="Schermvullend" title="Schermvullend"><svg class="i"><use href="#i-expand"/></svg></button>
+      <button type="button" class="icon-btn" id="btn-settings" data-action="settings" aria-label="Instellingen" title="Instellingen"><svg class="i"><use href="#i-settings"/></svg></button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="overview" id="overview" aria-label="Overzicht"></section>
+  <div class="strip" id="attention" hidden></div>
+  <div class="strip" id="moods" hidden></div>
+
+  <div class="toolbar" id="toolbar">
+    <nav class="filters" id="filters" aria-label="Filter"></nav>
+    <label class="search">
+      <span class="visually-hidden">Zoeken</span>
+      <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+      <input type="search" id="search" placeholder="Zoek apparaat of ruimte" autocomplete="off" spellcheck="false">
+    </label>
+    <div class="seg" role="group" aria-label="Indeling">
+      <button type="button" id="view-category" data-action="view" data-value="category" aria-pressed="true">Categorie</button>
+      <button type="button" id="view-zone" data-action="view" data-value="zone" aria-pressed="false">Ruimte</button>
+    </div>
+  </div>
+
+  <main class="sections" id="sections" aria-live="off"></main>
+
+  <footer class="footer" id="footer"></footer>
+</div>
+
+<dialog class="sheet" id="details" aria-labelledby="details-title"></dialog>
+
+<dialog class="sheet" id="settings" aria-labelledby="settings-title">
+  <form method="dialog" id="settings-form" class="sheet-form">
+    <div class="sheet-head">
+      <span class="tile-icon" aria-hidden="true"><svg class="i"><use href="#i-settings"/></svg></span>
+      <div class="sheet-title">
+        <h2 id="settings-title">Instellingen</h2>
+        <p>Verbinding met MCP AI Bridge op je Homey Pro.</p>
+      </div>
+      <button type="button" class="tile-more" data-action="close-dialog" aria-label="Sluiten"><svg class="i"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="sheet-body">
+      <div class="form">
+        <div class="field">
+          <label for="set-home">Naam van je huis</label>
+          <input id="set-home" type="text" maxlength="40" placeholder="Thuis">
+        </div>
+        <div class="field">
+          <label for="set-endpoint">Adres van de bridge</label>
+          <input id="set-endpoint" type="url" inputmode="url" placeholder="http://192.168.1.50:52199/mcp" autocomplete="off" spellcheck="false">
+          <span class="hint" id="set-endpoint-hint">Het MCP-adres uit de app-instellingen van MCP AI Bridge, tab Status. Leeg laten als dit dashboard door de bridge zelf wordt geserveerd.</span>
+        </div>
+        <div class="field">
+          <label for="set-key">API-sleutel</label>
+          <input id="set-key" type="password" autocomplete="off" spellcheck="false" placeholder="Plak hier de sleutel">
+          <span class="hint">Maak op de Security-tab een aparte sleutel met permissie <b>Control only</b>. De sleutel blijft alleen in deze browser.</span>
+        </div>
+        <div class="field">
+          <label for="set-interval">Verversen</label>
+          <select id="set-interval">
+            <option value="5">Elke 5 seconden</option>
+            <option value="10">Elke 10 seconden</option>
+            <option value="30">Elke 30 seconden</option>
+            <option value="60">Elke minuut</option>
+          </select>
+        </div>
+        <label class="check" for="set-demo">
+          <input id="set-demo" type="checkbox">
+          <span>Voorbeeldgegevens tonen in plaats van mijn eigen Homey</span>
+        </label>
+        <pre class="test-result" id="test-result" hidden></pre>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <button type="button" class="btn btn--ghost" data-action="test-connection">Verbinding testen</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn" data-action="close-dialog">Annuleren</button>
+      <button type="submit" class="btn btn--primary" id="settings-save">Opslaan</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="dot"></span><span id="toast-text"></span></div>
+
+<script type="application/json" id="hd-config">{}</script>
+<!-- @inline-js core.js -->
+<!-- @inline-js mcp.js -->
+<!-- @inline-js demo.js -->
+<!-- @inline-js app.js -->
+</body>
+</html>
